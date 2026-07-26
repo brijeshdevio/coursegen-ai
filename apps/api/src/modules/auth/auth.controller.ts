@@ -1,10 +1,13 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Res } from '@nestjs/common';
+import { type Response } from 'express';
 
-import { apiSuccessResponse } from '../../common/helpers';
+import { apiSuccessResponse, setCookie } from '../../common/helpers';
 import { ValidationPipe } from '../../common/pipes';
+import { COOKIE_MAX_AGE, COOKIE_NAME } from '../../common/constants';
 
 import { AuthService } from './auth.service';
 import { RegisterUserDto, RegisterUserSchema } from './dto/register.dto';
+import { LoginUserDto, LoginUserSchema } from './dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -21,5 +24,20 @@ export class AuthController {
       message: 'User registered successfully.',
       data,
     });
+  }
+
+  @Post('login')
+  async login(
+    @Body(new ValidationPipe(LoginUserSchema))
+    body: LoginUserDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { user, accessToken } = await this.authService.login(body);
+
+    setCookie(res, COOKIE_NAME.ACCESS_TOKEN, accessToken, {
+      maxAge: COOKIE_MAX_AGE.ACCESS_TOKEN,
+    });
+
+    return apiSuccessResponse({ message: 'Login successful.', data: user });
   }
 }
