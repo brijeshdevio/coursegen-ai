@@ -4,6 +4,7 @@ import helmet from 'helmet';
 
 import { AppModule } from './app.module';
 import { env } from './config';
+import { GlobalExceptionFilter } from './common/filters';
 
 const PORT = Number(env?.PORT) || 3000;
 async function bootstrap() {
@@ -14,6 +15,7 @@ async function bootstrap() {
   });
   app.use(helmet());
   app.use(cookieParser());
+  app.useGlobalFilters(new GlobalExceptionFilter());
   app.setGlobalPrefix('api/v1');
   await app.listen(PORT);
 }

@@ -1,0 +1,16 @@
+@base_url = http://localhost:5000/api/v1
+
+
+###
+GET {{base_url}}
+
+
+###
+POST {{base_url}}/auth/register
+Content-Type: application/json
+
+{
+    "name": "Alex",
+    "email": "alex@hotmail.com",
+    "password": "12345678"
+}
