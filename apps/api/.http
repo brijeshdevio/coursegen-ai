@@ -27,3 +27,45 @@ Content-Type: application/json
 
 ###
 POST {{base_url}}/auth/logout
+
+
+###
+POST {{base_url}}/courses/save
+Content-Type: application/json
+
+{
+  "title": "Complete C++ Programming Course",
+  "description": "C++ is a powerful, high-performance programming language used for system software, games and competitive programming.",
+  "topic": "C++",
+  "chapters": [
+    {
+      "order": 1,
+      "title": "Introduction to C++",
+      "points": [
+        "What is C++?",
+        "History of C++",
+        "Setting up environment"
+      ]
+    },
+    {
+      "order": 2,
+      "title": "Variables & Data Types",
+      "points": [
+        "Primitive types",
+        "Type casting"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "title": "C++ Full Course — freeCodeCamp",
+      "url": "https://youtube.com/watch?v=xxx",
+      "type": "youtube"
+    },
+    {
+      "title": "cppreference.com",
+      "url": "https://cppreference.com",
+      "type": "docs"
+    }
+  ]
+}
