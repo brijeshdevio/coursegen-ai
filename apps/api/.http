@@ -69,3 +69,7 @@ Content-Type: application/json
     }
   ]
 }
+
+
+###
+GET {{base_url}}/courses
