@@ -73,3 +73,7 @@ Content-Type: application/json
 
 ###
 GET {{base_url}}/courses
+
+
+###
+GET {{base_url}}/courses/cms1f80yq0005guwlfogikv4u

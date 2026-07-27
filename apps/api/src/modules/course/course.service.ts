@@ -1,10 +1,18 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
 import { PrismaService } from '../../prisma/prisma.service';
 import { Prisma } from '../../generated/prisma/client';
 
 import { CreateCourseDto } from './dto/create-course.dto';
-import { CreateCourseResponse, GetCoursesResponse } from './course.types';
+import {
+  CreateCourseResponse,
+  GetCourseResponse,
+  GetCoursesResponse,
+} from './course.types';
 import { GetCoursesQueryDto } from './dto/get-courses-query.dto';
 
 @Injectable()
@@ -140,5 +148,50 @@ export class CourseService {
         totalPages: Math.ceil(total / limit),
       },
     };
+  }
+
+  async getCourse(
+    userId: string,
+    courseId: string,
+  ): Promise<GetCourseResponse> {
+    const course = await this.prismaService.course.findFirst({
+      where: {
+        id: courseId,
+        userId,
+      },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        topic: true,
+        createdAt: true,
+        chapters: {
+          orderBy: {
+            order: 'asc',
+          },
+          select: {
+            id: true,
+            title: true,
+            order: true,
+            points: true,
+            completed: true,
+          },
+        },
+        resources: {
+          select: {
+            id: true,
+            title: true,
+            url: true,
+            type: true,
+          },
+        },
+      },
+    });
+
+    if (!course) {
+      throw new NotFoundException('Course not found.');
+    }
+
+    return course;
   }
 }

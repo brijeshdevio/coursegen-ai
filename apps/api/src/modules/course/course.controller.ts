@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 
 import { JwtAuthGuard } from '../../common/guards';
 import { User } from '../../common/decorators';
@@ -38,6 +46,13 @@ export class CourseController {
     query: GetCoursesQueryDto,
   ) {
     const data = await this.courseService.getCourses(userId, query);
+
+    return apiSuccessResponse({ data });
+  }
+
+  @Get(':id')
+  async getCourse(@User('id') userId: string, @Param('id') courseId: string) {
+    const data = await this.courseService.getCourse(userId, courseId);
 
     return apiSuccessResponse({ data });
   }

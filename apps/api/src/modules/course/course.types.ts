@@ -23,3 +23,24 @@ export type GetCoursesResponse = {
     totalPages: number;
   };
 };
+
+export type GetCourseResponse = {
+  id: string;
+  title: string;
+  description: string;
+  topic: string;
+  createdAt: Date;
+  chapters: {
+    id: string;
+    title: string;
+    order: number;
+    points: string[];
+    completed: boolean;
+  }[];
+  resources: {
+    id: string;
+    title: string;
+    url: string;
+    type: string;
+  }[];
+};
