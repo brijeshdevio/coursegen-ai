@@ -54,3 +54,10 @@ export type UpdateChapterResponse = {
     percentage: number;
   };
 };
+
+export type CourseResourceResponse = {
+  id: string;
+  title: string;
+  url: string;
+  type: string;
+};

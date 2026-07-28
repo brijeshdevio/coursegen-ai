@@ -9,6 +9,7 @@ import { Prisma } from '../../generated/prisma/client';
 
 import { CreateCourseDto } from './dto/create-course.dto';
 import {
+  CourseResourceResponse,
   CreateCourseResponse,
   GetCourseResponse,
   GetCoursesResponse,
@@ -275,5 +276,35 @@ export class CourseService {
         percentage: total === 0 ? 0 : Math.round((completed / total) * 100),
       },
     };
+  }
+
+  async getCourseResources(
+    userId: string,
+    courseId: string,
+  ): Promise<CourseResourceResponse[]> {
+    const course = await this.prismaService.course.findFirst({
+      where: {
+        id: courseId,
+
+        userId,
+      },
+      select: {
+        id: true,
+        resources: {
+          select: {
+            id: true,
+            title: true,
+            url: true,
+            type: true,
+          },
+        },
+      },
+    });
+
+    if (!course) {
+      throw new NotFoundException('Course not found.');
+    }
+
+    return course.resources;
   }
 }

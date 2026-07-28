@@ -90,3 +90,7 @@ Content-Type: application/json
 {
   "completed": true
 }
+
+
+### 
+GET {{base_url}}/courses/cms1f7x8f0000guwl71fvp8jk/resources

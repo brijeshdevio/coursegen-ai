@@ -96,4 +96,14 @@ export class CourseController {
       data,
     });
   }
+
+  @Get(':id/resources')
+  async getCourseResources(
+    @User('id') userId: string,
+    @Param('id') courseId: string,
+  ) {
+    const data = await this.courseService.getCourseResources(userId, courseId);
+
+    return apiSuccessResponse({ data });
+  }
 }
