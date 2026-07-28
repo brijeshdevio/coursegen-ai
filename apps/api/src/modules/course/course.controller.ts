@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -55,5 +56,18 @@ export class CourseController {
     const data = await this.courseService.getCourse(userId, courseId);
 
     return apiSuccessResponse({ data });
+  }
+
+  @Delete(':id')
+  async deleteCourse(
+    @User('id') userId: string,
+    @Param('id') courseId: string,
+  ) {
+    await this.courseService.deleteCourse(userId, courseId);
+
+    return apiSuccessResponse({
+      message: 'Course deleted successfully.',
+      data: null,
+    });
   }
 }

@@ -194,4 +194,27 @@ export class CourseService {
 
     return course;
   }
+
+  async deleteCourse(userId: string, courseId: string): Promise<void> {
+    const course = await this.prismaService.course.findFirst({
+      where: {
+        id: courseId,
+
+        userId,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!course) {
+      throw new NotFoundException('Course not found.');
+    }
+
+    await this.prismaService.course.delete({
+      where: {
+        id: course.id,
+      },
+    });
+  }
 }
