@@ -12,8 +12,10 @@ import {
   CreateCourseResponse,
   GetCourseResponse,
   GetCoursesResponse,
+  UpdateChapterResponse,
 } from './course.types';
 import { GetCoursesQueryDto } from './dto/get-courses-query.dto';
+import { UpdateChapterDto } from './dto/update-chapter.dto';
 
 @Injectable()
 export class CourseService {
@@ -216,5 +218,62 @@ export class CourseService {
         id: course.id,
       },
     });
+  }
+
+  async updateChapter(
+    userId: string,
+    courseId: string,
+    chapterId: string,
+    dto: UpdateChapterDto,
+  ): Promise<UpdateChapterResponse> {
+    const chapter = await this.prismaService.chapter.findFirst({
+      where: {
+        id: chapterId,
+        courseId,
+        course: {
+          userId,
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!chapter) {
+      throw new NotFoundException('Chapter not found.');
+    }
+
+    await this.prismaService.chapter.update({
+      where: {
+        id: chapter.id,
+      },
+      data: {
+        completed: dto.completed,
+      },
+    });
+
+    const [completed, total] = await this.prismaService.$transaction([
+      this.prismaService.chapter.count({
+        where: {
+          courseId,
+          completed: true,
+        },
+      }),
+      this.prismaService.chapter.count({
+        where: {
+          courseId,
+        },
+      }),
+    ]);
+
+    return {
+      id: chapter.id,
+      completed: dto.completed,
+      courseProgress: {
+        completed,
+        total,
+        percentage: total === 0 ? 0 : Math.round((completed / total) * 100),
+      },
+    };
   }
 }

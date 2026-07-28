@@ -44,3 +44,13 @@ export type GetCourseResponse = {
     type: string;
   }[];
 };
+
+export type UpdateChapterResponse = {
+  id: string;
+  completed: boolean;
+  courseProgress: {
+    completed: number;
+    total: number;
+    percentage: number;
+  };
+};

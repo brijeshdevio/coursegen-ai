@@ -81,3 +81,12 @@ GET {{base_url}}/courses/cms1f80yq0005guwlfogikv4u
 
 ###
 DELETE {{base_url}}/courses/cms1f80yq0005guwlfogikv4u
+
+
+### 
+PATCH {{base_url}}/courses/cms1f7x8f0000guwl71fvp8jk/chapter/cms1f7xed0001guwlpv8xzels
+Content-Type: application/json
+
+{
+  "completed": true
+}

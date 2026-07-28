@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -20,6 +21,10 @@ import {
   GetCoursesQueryDto,
   GetCoursesQuerySchema,
 } from './dto/get-courses-query.dto';
+import {
+  UpdateChapterDto,
+  UpdateChapterSchema,
+} from './dto/update-chapter.dto';
 
 @Controller('courses')
 @UseGuards(JwtAuthGuard)
@@ -68,6 +73,27 @@ export class CourseController {
     return apiSuccessResponse({
       message: 'Course deleted successfully.',
       data: null,
+    });
+  }
+
+  @Patch(':id/chapter/:chapterId')
+  async updateChapter(
+    @User('id') userId: string,
+    @Param('id') courseId: string,
+    @Param('chapterId') chapterId: string,
+    @Body(new ValidationPipe(UpdateChapterSchema))
+    body: UpdateChapterDto,
+  ) {
+    const data = await this.courseService.updateChapter(
+      userId,
+      courseId,
+      chapterId,
+      body,
+    );
+
+    return apiSuccessResponse({
+      message: 'Chapter updated successfully.',
+      data,
     });
   }
 }
