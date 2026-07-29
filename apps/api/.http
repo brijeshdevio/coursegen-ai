@@ -15,6 +15,7 @@ Content-Type: application/json
     "password": "12345678"
 }
 
+
 ###
 POST {{base_url}}/auth/login
 Content-Type: application/json
@@ -106,4 +107,15 @@ Content-Type: application/json
 
 {
   "name": "Alex Joy"
+}
+
+
+###
+PATCH {{base_url}}/users/me/password
+Content-Type: application/json
+
+{
+  "currentPassword": "12345678",
+  "newPassword": "123456789",
+  "confirmPassword": "123456789"
 }

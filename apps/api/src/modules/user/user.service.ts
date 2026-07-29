@@ -1,8 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import argon2 from 'argon2';
 
 import { PrismaService } from '../../prisma/prisma.service';
+
 import { GetProfileResponse, UpdateProfileResponse } from './user.types';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
 export class UserService {
@@ -84,5 +91,49 @@ export class UserService {
     });
 
     return updatedUser;
+  }
+
+  async changePassword(userId: string, dto: ChangePasswordDto): Promise<void> {
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        id: true,
+        password: true,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
+
+    const isPasswordValid = await argon2.verify(
+      user.password,
+      dto.currentPassword,
+    );
+
+    if (!isPasswordValid) {
+      throw new BadRequestException('Current password is incorrect.');
+    }
+
+    const isSamePassword = await argon2.verify(user.password, dto.newPassword);
+
+    if (isSamePassword) {
+      throw new BadRequestException(
+        'New password must be different from the current password.',
+      );
+    }
+
+    const passwordHash = await argon2.hash(dto.newPassword);
+
+    await this.prismaService.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        password: passwordHash,
+      },
+    });
   }
 }

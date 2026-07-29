@@ -10,6 +10,10 @@ import {
   UpdateProfileDto,
   UpdateProfileSchema,
 } from './dto/update-profile.dto';
+import {
+  ChangePasswordDto,
+  ChangePasswordSchema,
+} from './dto/change-password.dto';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)
@@ -34,6 +38,20 @@ export class UserController {
     return apiSuccessResponse({
       message: 'Profile updated successfully.',
       data,
+    });
+  }
+
+  @Patch('me/password')
+  async changePassword(
+    @User('id') userId: string,
+    @Body(new ValidationPipe(ChangePasswordSchema))
+    body: ChangePasswordDto,
+  ) {
+    await this.userService.changePassword(userId, body);
+
+    return apiSuccessResponse({
+      message: 'Password changed successfully.',
+      data: null,
     });
   }
 }
