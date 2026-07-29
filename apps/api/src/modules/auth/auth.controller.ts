@@ -8,11 +8,11 @@ import {
 } from '../../common/helpers';
 import { ValidationPipe } from '../../common/pipes';
 import { COOKIE_MAX_AGE, COOKIE_NAME } from '../../common/constants';
+import { JwtAuthGuard } from '../../common/guards';
 
 import { AuthService } from './auth.service';
 import { RegisterUserDto, RegisterUserSchema } from './dto/register.dto';
 import { LoginUserDto, LoginUserSchema } from './dto/login.dto';
-import { JwtAuthGuard } from 'src/common/guards';
 
 @Controller('auth')
 export class AuthController {
