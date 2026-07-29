@@ -98,3 +98,12 @@ GET {{base_url}}/courses/cms1f7x8f0000guwl71fvp8jk/resources
 
 ###
 GET {{base_url}}/users/me
+
+
+###
+PATCH {{base_url}}/users/me
+Content-Type: application/json
+
+{
+  "name": "Alex Joy"
+}

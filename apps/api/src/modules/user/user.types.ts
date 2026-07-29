@@ -6,3 +6,9 @@ export type GetProfileResponse = {
   completedCourses: number;
   createdAt: Date;
 };
+
+export type UpdateProfileResponse = {
+  id: string;
+  name: string;
+  email: string;
+};
