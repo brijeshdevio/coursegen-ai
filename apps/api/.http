@@ -119,3 +119,12 @@ Content-Type: application/json
   "newPassword": "123456789",
   "confirmPassword": "123456789"
 }
+
+
+###
+POST {{base_url}}/courses/generate
+Content-Type: application/json
+
+{
+  "topic": "C++"
+}

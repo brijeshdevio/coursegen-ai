@@ -3,3 +3,5 @@ allowBuilds:
   argon2: true
   prisma: true
   unrs-resolver: true
+minimumReleaseAgeExclude:
+  - '@ai-sdk/google@4.0.24'

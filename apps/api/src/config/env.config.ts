@@ -7,6 +7,7 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(32),
   DATABASE_URL: z.url(),
   CLIENT_URL: z.url(),
+  GROQ_API_KEY: z.string(),
 });
 
 export type Env = z.infer<typeof envSchema>;

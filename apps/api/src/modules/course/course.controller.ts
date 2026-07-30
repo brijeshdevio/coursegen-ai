@@ -3,10 +3,12 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   Param,
   Patch,
   Post,
   Query,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 
@@ -25,11 +27,20 @@ import {
   UpdateChapterDto,
   UpdateChapterSchema,
 } from './dto/update-chapter.dto';
+import { AiService } from '../ai/ai.service';
+import { type Response } from 'express';
+import {
+  GenerateCourseDto,
+  GenerateCourseSchema,
+} from './dto/generate-course.dto';
 
 @Controller('courses')
 @UseGuards(JwtAuthGuard)
 export class CourseController {
-  constructor(private readonly courseService: CourseService) {}
+  constructor(
+    private readonly courseService: CourseService,
+    private readonly aiService: AiService,
+  ) {}
 
   @Post('save')
   async createCourse(
@@ -103,6 +114,15 @@ export class CourseController {
     @Param('id') courseId: string,
   ) {
     const data = await this.courseService.getCourseResources(userId, courseId);
+
+    return apiSuccessResponse({ data });
+  }
+
+  @Post('generate')
+  async generateCourse(
+    @Body(new ValidationPipe(GenerateCourseSchema)) body: GenerateCourseDto,
+  ) {
+    const data = await this.aiService.generateCourse(body.topic);
 
     return apiSuccessResponse({ data });
   }
