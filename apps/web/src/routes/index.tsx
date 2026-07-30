@@ -1,14 +1,368 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import {
+  ArrowRight,
+  Sparkles,
+  BookOpen,
+  Video,
+  FileText,
+  CheckCircle2,
+  Zap,
+  LineChart,
+} from "lucide-react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { MarketingNavbar, Logo } from "@/components/site/navbar";
+import { TopicBadge } from "@/components/site/topic-badge";
 
-export const Route = createFileRoute('/')({ component: Home })
+export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "CourseGen AI — Learn Anything. Instantly." },
+      {
+        name: "description",
+        content:
+          "Type any topic and get a complete structured course with chapters, learning points, and free resources — powered by AI.",
+      },
+      {
+        property: "og:title",
+        content: "CourseGen AI — Learn Anything. Instantly.",
+      },
+      {
+        property: "og:description",
+        content: "AI-generated courses on any topic in seconds.",
+      },
+    ],
+  }),
+  component: Landing,
+});
 
-function Home() {
+const SUGGESTIONS = [
+  "Python",
+  "C++",
+  "DSA",
+  "Networking",
+  "React",
+  "System Design",
+];
+
+function Landing() {
+  const [topic, setTopic] = useState("");
+  const navigate = useNavigate();
+
+  const go = () => {
+    const t = topic.trim();
+    if (!t) return;
+    navigate({ to: "/", search: { topic: t } as never });
+  };
+
   return (
-    <div className="p-8">
-      <h1 className="text-4xl font-bold">Welcome to TanStack Start</h1>
-      <p className="mt-4 text-lg">
-        Edit <code>src/routes/index.tsx</code> to get started.
-      </p>
+    <div className="min-h-screen">
+      <MarketingNavbar />
+
+      {/* HERO */}
+      <section className="relative overflow-hidden">
+        <div
+          className="absolute inset-0 mesh-bg opacity-90 pointer-events-none"
+          aria-hidden
+        />
+        <div
+          className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-primary/40 to-transparent"
+          aria-hidden
+        />
+
+        <div className="relative mx-auto max-w-5xl px-6 pt-20 pb-24 text-center sm:pt-28 sm:pb-32">
+          <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
+            <Sparkles className="h-3 w-3 text-primary" />
+            Powered by AI — free to start
+          </div>
+
+          <h1 className="mt-6 font-display text-5xl font-black leading-[1.05] tracking-tight sm:text-6xl md:text-7xl">
+            Learn anything.
+            <br />
+            <span className="text-gradient">Instantly.</span>
+          </h1>
+
+          <p className="mx-auto mt-6 max-w-2xl text-base text-muted-foreground sm:text-lg">
+            Type any topic and get a complete structured course with chapters,
+            learning points, and free resources — powered by AI.
+          </p>
+
+          {/* Interactive input */}
+          <div className="mx-auto mt-10 max-w-2xl">
+            <div className="group relative rounded-2xl border bg-card p-2 shadow-[0_10px_60px_-20px_rgba(108,99,255,0.35)] focus-within:border-primary/50">
+              <div className="flex items-center gap-2">
+                <span className="pl-3 pr-1 font-mono text-xs text-muted-foreground hidden sm:inline">
+                  &gt;_
+                </span>
+                <Input
+                  value={topic}
+                  onChange={(e) => setTopic(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && go()}
+                  placeholder="What do you want to learn today?"
+                  className="h-12 flex-1 border-0 !bg-card text-base placeholder:text-muted-foreground focus-visible:ring-0 shadow-none"
+                />
+                <Button onClick={go} className="h-12 gap-2 rounded-xl px-5">
+                  Generate <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+              <span className="text-xs text-muted-foreground mr-1">Try:</span>
+              {SUGGESTIONS.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setTopic(s)}
+                  className="rounded-full border border-border bg-card px-3 py-1 font-mono text-xs text-muted-foreground transition hover:border-primary/50 hover:text-foreground"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <p className="mt-10 text-xs text-muted-foreground">
+            <span className="text-foreground font-semibold">10,000+</span>{" "}
+            courses generated by learners like you
+          </p>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section id="how" className="mx-auto max-w-6xl px-6 py-24">
+        <div className="mb-14 max-w-2xl">
+          <p className="font-mono text-xs uppercase tracking-widest text-primary">
+            How it works
+          </p>
+          <h2 className="mt-3 font-display text-4xl font-bold tracking-tight sm:text-5xl">
+            From topic to course in three steps.
+          </h2>
+        </div>
+
+        <div className="relative grid gap-8 md:grid-cols-3">
+          <div className="pointer-events-none absolute left-0 right-0 top-6 hidden h-px md:block">
+            <div className="h-full w-full border-t border-dashed border-border" />
+          </div>
+          {[
+            {
+              n: "01",
+              title: "Type your topic",
+              desc: "Anything — a language, a subject, a skill you want to learn.",
+            },
+            {
+              n: "02",
+              title: "AI generates a course",
+              desc: "Chapters, learning points, and curated free resources in seconds.",
+            },
+            {
+              n: "03",
+              title: "Learn & track progress",
+              desc: "Mark chapters complete and pick up right where you left off.",
+            },
+          ].map((s) => (
+            <div
+              key={s.n}
+              className="relative rounded-2xl border border-border bg-card p-6"
+            >
+              <span className="font-mono text-sm text-primary">{s.n}</span>
+              <h3 className="mt-3 text-lg font-semibold">{s.title}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{s.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* FEATURES */}
+      <section id="features" className="mx-auto max-w-6xl px-6 py-24">
+        <div className="grid gap-6 md:grid-cols-6">
+          <div className="md:col-span-4 rounded-2xl border border-border bg-card p-8 relative overflow-hidden card-hover">
+            <div
+              className="absolute -right-16 -top-16 h-52 w-52 rounded-full bg-primary/20 blur-3xl"
+              aria-hidden
+            />
+            <Zap className="h-5 w-5 text-primary" />
+            <h3 className="mt-4 font-display text-2xl font-bold">
+              AI-generated courses
+            </h3>
+            <p className="mt-2 max-w-md text-sm text-muted-foreground">
+              A tailored curriculum built for your exact topic — no generic
+              playlists, no filler content, no signup for every service.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-2 font-mono text-xs">
+              <span className="rounded-md border border-border bg-elevated px-2 py-1">
+                → Chapters
+              </span>
+              <span className="rounded-md border border-border bg-elevated px-2 py-1">
+                → Learning points
+              </span>
+              <span className="rounded-md border border-border bg-elevated px-2 py-1">
+                → Resources
+              </span>
+            </div>
+          </div>
+          <div className="md:col-span-2 rounded-2xl border border-border bg-card p-6 card-hover">
+            <BookOpen className="h-5 w-5 text-success" />
+            <h3 className="mt-4 font-semibold">Free resources</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Curated YouTube videos, articles, and official docs.
+            </p>
+          </div>
+          <div className="md:col-span-2 rounded-2xl border border-border bg-card p-6 card-hover">
+            <LineChart className="h-5 w-5 text-primary" />
+            <h3 className="mt-4 font-semibold">Progress tracking</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Mark chapters complete and see your journey unfold.
+            </p>
+          </div>
+          <div className="md:col-span-4 rounded-2xl border border-border bg-card p-6 card-hover">
+            <Sparkles className="h-5 w-5 text-primary" />
+            <h3 className="mt-4 font-semibold">Any topic. Any level.</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              From Python to system design — pick a topic, get a structured
+              path.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* EXAMPLE */}
+      <section id="example" className="mx-auto max-w-6xl px-6 py-24">
+        <div className="grid gap-10 md:grid-cols-2 md:items-center">
+          <div>
+            <p className="font-mono text-xs uppercase tracking-widest text-primary">
+              Example
+            </p>
+            <h2 className="mt-3 font-display text-4xl font-bold tracking-tight sm:text-5xl">
+              Here's what you get.
+            </h2>
+            <p className="mt-4 text-muted-foreground">
+              A real preview of a generated course. Chapters with actionable
+              points, and a resource panel with free videos, articles, and
+              official docs.
+            </p>
+            <div className="mt-6">
+              <Link to="/generate">
+                <Button size="lg" className="gap-2">
+                  Generate your first course <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-border bg-card p-6 glow-primary">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <TopicBadge topic="C++" />
+                <h3 className="mt-3 font-display text-2xl font-bold">
+                  Complete C++ Programming
+                </h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  10 chapters · 5 resources
+                </p>
+              </div>
+            </div>
+            <ul className="mt-6 space-y-2">
+              {[
+                { title: "Introduction to C++", done: true },
+                { title: "Variables & Data Types", done: true },
+                { title: "Control Flow", done: false, current: true },
+                { title: "Functions & Scope", done: false },
+                { title: "Pointers & Memory", done: false },
+              ].map((c, i) => (
+                <li
+                  key={i}
+                  className={`flex items-center gap-3 rounded-lg border border-transparent px-3 py-2 ${
+                    c.current
+                      ? "border-primary/40 bg-primary/10"
+                      : "bg-elevated/40"
+                  }`}
+                >
+                  {c.done ? (
+                    <CheckCircle2 className="h-4 w-4 text-success" />
+                  ) : (
+                    <span
+                      className={`grid h-4 w-4 place-items-center rounded-full border ${c.current ? "border-primary" : "border-muted-foreground/40"}`}
+                    >
+                      {c.current && (
+                        <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                      )}
+                    </span>
+                  )}
+                  <span className={`font-mono text-xs text-muted-foreground`}>
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span
+                    className={`text-sm ${c.done ? "line-through text-muted-foreground" : ""}`}
+                  >
+                    {c.title}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-6 grid gap-2 border-t border-border pt-4">
+              <div className="flex items-center gap-2 text-xs">
+                <Video className="h-4 w-4 text-[#ff4d6d]" />
+                <span className="text-muted-foreground">
+                  YouTube · Full course walkthrough
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <FileText className="h-4 w-4 text-primary" />
+                <span className="text-muted-foreground">
+                  Article · The definitive beginner's guide
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <BookOpen className="h-4 w-4 text-success" />
+                <span className="text-muted-foreground">
+                  Docs · Official C++ reference
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="mx-auto max-w-6xl px-6 pb-24">
+        <div className="relative overflow-hidden rounded-3xl border border-border p-12 text-center">
+          <div className="absolute inset-0 mesh-bg opacity-80" aria-hidden />
+          <div className="relative">
+            <h2 className="font-display text-4xl font-bold tracking-tight sm:text-5xl">
+              Start learning anything today.
+            </h2>
+            <p className="mt-4 text-muted-foreground">
+              Free to start. No credit card required.
+            </p>
+            <div className="mt-8 flex justify-center">
+              <Link to="/courses">
+                <Button size="lg" className="gap-2">
+                  Get started <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="border-t border-border">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 sm:flex-row">
+          <Logo />
+          <p className="text-xs text-muted-foreground">
+            © {new Date().getFullYear()} CourseGen AI. All rights reserved.
+          </p>
+          <div className="flex gap-4 text-xs text-muted-foreground">
+            <a href="#" className="hover:text-foreground">
+              Privacy
+            </a>
+            <a href="#" className="hover:text-foreground">
+              Terms
+            </a>
+          </div>
+        </div>
+      </footer>
     </div>
-  )
+  );
 }
