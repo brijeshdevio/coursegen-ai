@@ -56,27 +56,36 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest();
 
     let statusCode = 500;
-    let errorCode = ERROR_CODES.INTERNAL_SERVER_ERROR;
     let message = 'An unexpected error occurred';
     let errors: { [key: string]: { message: string } } | undefined;
 
     // Handle NestJS HTTP Exception
     if (exception instanceof HttpException) {
       statusCode = exception.getStatus();
-      const exceptionResponse = exception.getResponse() as any;
+      const exceptionResponse = exception.getResponse() as {
+        message: string;
+        code?: string;
+        error?: { errors: { [key: string]: { message: string } } };
+      };
 
       message = exceptionResponse.message || exception.message;
-      errorCode =
-        exceptionResponse.code || exceptionResponse.error || 'HTTP_ERROR';
-      errors = exceptionResponse.errors;
+      const errorCode = exceptionResponse.code || 'HTTP_ERROR';
+      errors = exceptionResponse.error?.errors;
 
-      this.logException(request, statusCode, errorCode, message, exception);
+      this.logException(
+        request,
+        statusCode,
+        exceptionResponse.code || errorCode,
+        message,
+        exception,
+      );
 
       return response.status(statusCode).json(
         apiErrorResponse({
           message,
           statusCode,
           code: errorCode,
+          errors,
         }),
       );
     }
@@ -97,13 +106,19 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         );
       }
 
-      this.logException(request, statusCode, errorCode, message, exception);
+      this.logException(
+        request,
+        statusCode,
+        prismaError.errorCode,
+        message,
+        exception,
+      );
 
       return response.status(statusCode).json(
         apiErrorResponse({
           message,
           statusCode,
-          code: errorCode,
+          code: prismaError.errorCode,
         }),
       );
     }
@@ -125,7 +140,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       apiErrorResponse({
         message,
         statusCode,
-        code: errorCode,
+        code: ERROR_CODES.INTERNAL_SERVER_ERROR,
       }),
     );
   }
