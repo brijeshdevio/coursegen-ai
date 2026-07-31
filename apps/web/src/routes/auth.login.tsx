@@ -1,20 +1,11 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { ArrowRight, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { AuthShell } from "#/components/site/auth-shell";
+import { AuthShell } from "@/components/site/auth-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { setUser } from "@/lib/course-store";
-
-const schema = z.object({
-  email: z.string().email("Enter a valid email"),
-  password: z.string().min(1, "Enter your password"),
-});
-type Values = z.infer<typeof schema>;
+import { useLoginFacade } from "@/features/auth/hooks/useLogin";
 
 export const Route = createFileRoute("/auth/login")({
   head: () => ({
@@ -35,29 +26,9 @@ export const Route = createFileRoute("/auth/login")({
 });
 
 function Login() {
-  const navigate = useNavigate();
   const [show, setShow] = useState(false);
-  const [banner, setBanner] = useState<string | null>(null);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<Values>({
-    resolver: zodResolver(schema),
-  });
-
-  const onSubmit = async (v: Values) => {
-    setBanner(null);
-    await new Promise((r) => setTimeout(r, 700));
-    // Mock auth — accept anything
-    const name = v.email.split("@")[0].replace(/[._-]/g, " ");
-    setUser({
-      name: name.charAt(0).toUpperCase() + name.slice(1),
-      email: v.email,
-    });
-    navigate({ to: "/courses" });
-  };
+  const { handleSubmit, submit, register, errors, isPending } =
+    useLoginFacade();
 
   return (
     <AuthShell
@@ -72,14 +43,7 @@ function Login() {
         </>
       }
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-        {banner && (
-          <div className="flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
-            <AlertCircle className="mt-0.5 h-4 w-4" />
-            <span>{banner}</span>
-          </div>
-        )}
-
+      <form onSubmit={handleSubmit(submit)} className="space-y-5">
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
@@ -136,9 +100,9 @@ function Login() {
           type="submit"
           className="w-full gap-2"
           size="lg"
-          disabled={isSubmitting}
+          disabled={isPending}
         >
-          {isSubmitting ? (
+          {isPending ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <>
