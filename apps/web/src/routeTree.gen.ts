@@ -10,25 +10,16 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as CoursesRouteImport } from './routes/courses'
-import { Route as GenerateRouteImport } from './routes/generate'
-import { Route as AuthLoginRouteImport } from './routes/auth.login'
-import { Route as AuthSignupRouteImport } from './routes/auth.signup'
-import { Route as CoursesIndexRouteImport } from './routes/courses.index'
+import { Route as AuthLoginRouteImport } from './routes/auth/login'
+import { Route as AuthSignupRouteImport } from './routes/auth/signup'
+import { Route as CoursesIndexRouteImport } from './routes/courses/index'
+import { Route as CoursesLayoutRouteImport } from './routes/courses/_layout'
+import { Route as CoursesCoursesRouteImport } from './routes/courses/courses'
+import { Route as CoursesGenerateRouteImport } from './routes/courses/generate'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CoursesRoute = CoursesRouteImport.update({
-  id: '/courses',
-  path: '/courses',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GenerateRoute = GenerateRouteImport.update({
-  id: '/generate',
-  path: '/generate',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthLoginRoute = AuthLoginRouteImport.update({
@@ -42,62 +33,88 @@ const AuthSignupRoute = AuthSignupRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const CoursesIndexRoute = CoursesIndexRouteImport.update({
-  id: '/',
-  path: '/',
+  id: '/courses/',
+  path: '/courses/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoursesLayoutRoute = CoursesLayoutRouteImport.update({
+  id: '/_layout',
   getParentRoute: () => CoursesRoute,
+} as any)
+const CoursesCoursesRoute = CoursesCoursesRouteImport.update({
+  id: '/courses/courses',
+  path: '/courses/courses',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoursesGenerateRoute = CoursesGenerateRouteImport.update({
+  id: '/courses/generate',
+  path: '/courses/generate',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/courses': typeof CoursesRouteWithChildren
-  '/generate': typeof GenerateRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/courses': typeof CoursesLayoutRoute
+  '/courses/courses': typeof CoursesCoursesRoute
+  '/courses/generate': typeof CoursesGenerateRoute
   '/courses/': typeof CoursesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/generate': typeof GenerateRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
   '/courses': typeof CoursesIndexRoute
+  '/courses/courses': typeof CoursesCoursesRoute
+  '/courses/generate': typeof CoursesGenerateRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/courses': typeof CoursesRouteWithChildren
-  '/generate': typeof GenerateRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/courses/_layout': typeof CoursesLayoutRoute
+  '/courses/courses': typeof CoursesCoursesRoute
+  '/courses/generate': typeof CoursesGenerateRoute
   '/courses/': typeof CoursesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/courses'
-    | '/generate'
     | '/auth/login'
     | '/auth/signup'
+    | '/courses'
+    | '/courses/courses'
+    | '/courses/generate'
     | '/courses/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/generate' | '/auth/login' | '/auth/signup' | '/courses'
+  to:
+    | '/'
+    | '/auth/login'
+    | '/auth/signup'
+    | '/courses'
+    | '/courses/courses'
+    | '/courses/generate'
   id:
     | '__root__'
     | '/'
-    | '/courses'
-    | '/generate'
     | '/auth/login'
     | '/auth/signup'
+    | '/courses/_layout'
+    | '/courses/courses'
+    | '/courses/generate'
     | '/courses/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  CoursesRoute: typeof CoursesRouteWithChildren
-  GenerateRoute: typeof GenerateRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthSignupRoute: typeof AuthSignupRoute
+  CoursesCoursesRoute: typeof CoursesCoursesRoute
+  CoursesGenerateRoute: typeof CoursesGenerateRoute
+  CoursesIndexRoute: typeof CoursesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -107,20 +124,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/courses': {
-      id: '/courses'
-      path: '/courses'
-      fullPath: '/courses'
-      preLoaderRoute: typeof CoursesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/generate': {
-      id: '/generate'
-      path: '/generate'
-      fullPath: '/generate'
-      preLoaderRoute: typeof GenerateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/login': {
@@ -139,31 +142,42 @@ declare module '@tanstack/react-router' {
     }
     '/courses/': {
       id: '/courses/'
-      path: '/'
+      path: '/courses'
       fullPath: '/courses/'
       preLoaderRoute: typeof CoursesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/courses/_layout': {
+      id: '/courses/_layout'
+      path: ''
+      fullPath: '/courses'
+      preLoaderRoute: typeof CoursesLayoutRouteImport
       parentRoute: typeof CoursesRoute
+    }
+    '/courses/courses': {
+      id: '/courses/courses'
+      path: '/courses/courses'
+      fullPath: '/courses/courses'
+      preLoaderRoute: typeof CoursesCoursesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/courses/generate': {
+      id: '/courses/generate'
+      path: '/courses/generate'
+      fullPath: '/courses/generate'
+      preLoaderRoute: typeof CoursesGenerateRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
 
-interface CoursesRouteChildren {
-  CoursesIndexRoute: typeof CoursesIndexRoute
-}
-
-const CoursesRouteChildren: CoursesRouteChildren = {
-  CoursesIndexRoute: CoursesIndexRoute,
-}
-
-const CoursesRouteWithChildren =
-  CoursesRoute._addFileChildren(CoursesRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  CoursesRoute: CoursesRouteWithChildren,
-  GenerateRoute: GenerateRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthSignupRoute: AuthSignupRoute,
+  CoursesCoursesRoute: CoursesCoursesRoute,
+  CoursesGenerateRoute: CoursesGenerateRoute,
+  CoursesIndexRoute: CoursesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
