@@ -3,11 +3,10 @@ import { type Response } from 'express';
 
 import {
   apiSuccessResponse,
-  clearCookie,
-  setCookie,
+  clearAllCookies,
+  setSessionCookie,
 } from '../../common/helpers';
 import { ValidationPipe } from '../../common/pipes';
-import { COOKIE_MAX_AGE, COOKIE_NAME } from '../../common/constants';
 import { JwtAuthGuard } from '../../common/guards';
 
 import { AuthService } from './auth.service';
@@ -38,10 +37,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const { user, accessToken } = await this.authService.login(body);
-
-    setCookie(res, COOKIE_NAME.ACCESS_TOKEN, accessToken, {
-      maxAge: COOKIE_MAX_AGE.ACCESS_TOKEN,
-    });
+    setSessionCookie(res, accessToken);
 
     return apiSuccessResponse({ message: 'Login successful.', data: user });
   }
@@ -49,7 +45,7 @@ export class AuthController {
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   logout(@Res({ passthrough: true }) res: Response) {
-    clearCookie(res, COOKIE_NAME.ACCESS_TOKEN);
+    clearAllCookies(res);
 
     return apiSuccessResponse({ message: 'Logout successful.' });
   }

@@ -109,7 +109,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       this.logException(
         request,
         statusCode,
-        prismaError.errorCode,
+        prismaError?.errorCode,
         message,
         exception,
       );
@@ -118,7 +118,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         apiErrorResponse({
           message,
           statusCode,
-          code: prismaError.errorCode,
+          code: prismaError?.errorCode,
         }),
       );
     }

@@ -27,7 +27,6 @@ export class AuthService {
         id: true,
       },
     });
-    console.log(existingUser);
 
     if (existingUser) {
       throw new ConflictException('Email is already registered.');

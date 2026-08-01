@@ -6,8 +6,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-
-import { COOKIE_NAME } from '../constants';
+import { COOKIE_CONFIG } from '../constants';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -15,7 +14,7 @@ export class JwtAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
-    const token = request.cookies?.[COOKIE_NAME.ACCESS_TOKEN] as string;
+    const token = request.cookies?.[COOKIE_CONFIG.SESSION_NAME] as string;
 
     try {
       const payload = (await this.jwtService.verifyAsync(token)) as unknown as {
