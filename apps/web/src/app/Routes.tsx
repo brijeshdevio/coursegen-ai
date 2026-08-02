@@ -1,3 +1,4 @@
+import { ProtectedLayout } from "@/components/layout/ProtectedLayout";
 import { lazy } from "react";
 import {
   BrowserRouter,
@@ -19,9 +20,11 @@ export default function Routes() {
         <Route path="/" element={<Index />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/courses" element={<Courses />} />
-        <Route path="/courses/generate" element={<Generate />} />
-        <Route path="/courses/:id" element={<Course />} />
+        <Route element={<ProtectedLayout />}>
+          <Route path="/courses" element={<Courses />} />
+          <Route path="/courses/generate" element={<Generate />} />
+          <Route path="/courses/:id" element={<Course />} />
+        </Route>
       </RoutesWrapper>
     </BrowserRouter>
   );

@@ -1,7 +1,9 @@
 import { Sparkles, Quote, ArrowLeft } from "lucide-react";
 import type { ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import { Logo } from "./Navbar";
+import { WindowLoader } from "../loader";
 
 export function AuthLayout({
   title,
@@ -14,6 +16,17 @@ export function AuthLayout({
   children: ReactNode;
   footer: ReactNode;
 }) {
+  const navigate = useNavigate();
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <WindowLoader />;
+  }
+
+  if (isAuthenticated) {
+    navigate("/courses");
+  }
+
   return (
     <div className="grid min-h-screen lg:grid-cols-5">
       {/* Left visual panel */}
