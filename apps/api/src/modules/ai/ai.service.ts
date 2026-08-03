@@ -4,8 +4,6 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 
-import { generateText } from 'ai';
-
 import { env } from '../../config';
 import { COURSE_SYSTEM_PROMPT } from '../../constants';
 import { GenerateCourseDto } from '../course/dto/generate-course.dto';
@@ -18,6 +16,7 @@ export class AiService {
 
   async generateCourse(data: GenerateCourseDto): Promise<CourseResponse> {
     const { createGroq } = await import('@ai-sdk/groq');
+    const { generateText } = await import('ai');
     const groq = createGroq({ apiKey: env.GROQ_API_KEY });
     let rawText: string;
     // [1] Call AI — network/API errors handle karo
