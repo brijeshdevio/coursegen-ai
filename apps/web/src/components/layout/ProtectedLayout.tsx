@@ -1,6 +1,7 @@
 import { Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { WindowLoader } from "../loader";
+import { AppNavbar } from "./Navbar";
 
 export function ProtectedLayout() {
   const navigate = useNavigate();
@@ -15,8 +16,9 @@ export function ProtectedLayout() {
   }
 
   return (
-    <>
+    <div className="min-h-screen">
+      <AppNavbar />
       <Outlet />
-    </>
+    </div>
   );
 }
