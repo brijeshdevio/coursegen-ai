@@ -3,7 +3,7 @@ import {
   Logger,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { createGroq } from '@ai-sdk/groq';
+
 import { generateText } from 'ai';
 
 import { env } from '../../config';
@@ -16,14 +16,13 @@ import { parseAiResponse } from './utils/parse-ai-response';
 export class AiService {
   private readonly logger = new Logger(AiService.name);
 
-  private groq = createGroq({ apiKey: env.GROQ_API_KEY });
-
   async generateCourse(data: GenerateCourseDto): Promise<CourseResponse> {
+    const { createGroq } = await import('@ai-sdk/groq');
+    const groq = createGroq({ apiKey: env.GROQ_API_KEY });
     let rawText: string;
-
     // [1] Call AI — network/API errors handle karo
     try {
-      const model = this.groq('llama-3.3-70b-versatile');
+      const model = groq('llama-3.3-70b-versatile');
       const { text } = await generateText({
         model,
         system: COURSE_SYSTEM_PROMPT,
