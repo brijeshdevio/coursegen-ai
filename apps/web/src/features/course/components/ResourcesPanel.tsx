@@ -1,23 +1,6 @@
+import { ExternalLink } from "lucide-react";
+import { RESOURCE_META } from "@/constants";
 import type { CourseType } from "@/types/course";
-import { BookOpen, ExternalLink, FileText, Video } from "lucide-react";
-
-const RESOURCE_META = {
-  youtube: {
-    icon: Video,
-    label: "YouTube",
-    cls: "text-[#ff4d6d] bg-[#ff4d6d]/10 border-[#ff4d6d]/30",
-  },
-  article: {
-    icon: FileText,
-    label: "Article",
-    cls: "text-primary bg-primary/10 border-primary/30",
-  },
-  docs: {
-    icon: BookOpen,
-    label: "Docs",
-    cls: "text-success bg-success/10 border-success/30",
-  },
-};
 
 export function ResourcesPanel({
   resources,
@@ -28,6 +11,7 @@ export function ResourcesPanel({
     type,
     items: resources.filter((r) => r.type === type),
   }));
+
   return (
     <div className="space-y-5 rounded-2xl border border-border bg-card p-5">
       {groups.map((g) => {

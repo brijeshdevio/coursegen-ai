@@ -2,12 +2,13 @@ import { Link } from "react-router-dom";
 import { Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { CourseCardType } from "@/types/course";
+import { formatDate } from "@/utils/formatDate";
 
 export const CourseCard = ({ course }: { course: CourseCardType }) => {
   return (
     <Link
       to={`/courses/${course.id}`}
-      className="group card-hover relative flex flex-col rounded-2xl border border-border bg-card p-5"
+      className="group relative flex flex-col rounded-2xl border card-hover border-border bg-card p-5"
     >
       <div className="flex items-start justify-between gap-2">
         <Badge>{course.topic}</Badge>
@@ -16,19 +17,19 @@ export const CourseCard = ({ course }: { course: CourseCardType }) => {
             e.preventDefault();
             e.stopPropagation();
           }}
-          className="hover:bg-elevated rounded-md p-1 text-muted-foreground opacity-0 transition group-hover:opacity-100 hover:text-destructive"
+          className="rounded-md p-1 text-muted-foreground opacity-0 transition group-hover:opacity-100 hover:bg-elevated hover:text-destructive"
           aria-label="Delete course"
         >
           <Trash2 className="h-4 w-4" />
         </button>
       </div>
 
-      <h3 className="font-display mt-4 line-clamp-2 text-lg leading-snug font-bold">
+      <h3 className="mt-4 line-clamp-2 font-display text-lg leading-snug font-bold">
         {course.title}
       </h3>
 
       <div className="mt-auto pt-5">
-        <div className="bg-elevated h-1.5 w-full overflow-hidden rounded-full">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-elevated">
           <div
             className="h-full rounded-full bg-primary transition-all"
             style={{ width: `${23}%` }}
@@ -39,7 +40,7 @@ export const CourseCard = ({ course }: { course: CourseCardType }) => {
             {course.completedChapters}/{course.chaptersCount} chapters
           </span>
           <span className="text-muted-foreground">
-            {String(course.createdAt)}
+            {formatDate(course.createdAt)}
           </span>
         </div>
       </div>
