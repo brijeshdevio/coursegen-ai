@@ -1,5 +1,5 @@
 import { ArrowRight, Check, RefreshCw } from "lucide-react";
-import { Link } from "react-router-dom";
+import { data, Link } from "react-router-dom";
 import {
   Accordion,
   AccordionContent,
@@ -10,10 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { RESOURCE_ICON } from "@/constants";
 import type { CourseType } from "@/types/course";
+import { useSaveCourseFacade } from "../hooks/useSaveCourse";
 
 export function ResultBlock({
   course,
-  onSave,
   onRegenerate,
   onClear,
   saved,
@@ -24,6 +24,12 @@ export function ResultBlock({
   onClear: () => void;
   saved: boolean;
 }) {
+  const saveCourseMutation = useSaveCourseFacade();
+
+  const handleSave = () => {
+    if (course) saveCourseMutation.mutate(course);
+  };
+
   return (
     <div className="mx-auto mt-12 max-w-3xl animate-in duration-500 fade-in slide-in-from-bottom-4">
       {/* Preview card */}
@@ -117,15 +123,15 @@ export function ResultBlock({
               <RefreshCw className="h-4 w-4" /> Regenerate
             </Button>
             <Button
-              onClick={onSave}
-              disabled={saved}
+              onClick={handleSave}
+              disabled={saveCourseMutation.isPending}
               className={
                 saved
                   ? "bg-success text-success-foreground hover:bg-success/90"
                   : ""
               }
             >
-              {saved ? (
+              {saveCourseMutation.isSuccess ? (
                 <>
                   <Check className="h-4 w-4" /> Saved
                 </>
@@ -139,7 +145,7 @@ export function ResultBlock({
         </div>
       </div>
 
-      {saved && (
+      {saveCourseMutation.isSuccess && (
         <p className="mt-3 text-center text-sm text-muted-foreground">
           <Link to="/courses" className="text-primary hover:underline">
             View in My courses →

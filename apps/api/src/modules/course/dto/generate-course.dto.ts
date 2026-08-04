@@ -4,9 +4,13 @@ import z from 'zod';
 export const GenerateCourseSchema = z
   .object({
     topic: z
-      .string({ message: 'Topic is required.' })
+      .string({ error: 'Topic is required.' })
       .min(2, 'Topic must be at least 2 characters.')
-      .max(100, 'Topic must not exceed 100 characters.'),
+      .max(200, 'Topic cannot exceed 200 characters.'),
+
+    level: z.enum(['BEGINNER', 'INTERMEDIATE', 'ADVANCED'], {
+      error: 'Please select a valid course level.',
+    }),
   })
   .strict();
 

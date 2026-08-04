@@ -1,21 +1,26 @@
-export type CreateCourseResponse = {
+export type SaveCourseResponse = {
   id: string;
   title: string;
+  description: string | null;
   topic: string;
+  level: string | null;
   createdAt: Date;
 };
 
-export type CourseItemResponse = {
+export type CourseListItemResponse = {
   id: string;
   title: string;
+  description: string | null;
   topic: string;
-  chaptersCount: number;
-  completedChapters: number;
+  level: string | null;
+  totalModules: number;
+  totalTopics: number;
+  totalCompletedTopics: number;
   createdAt: Date;
 };
 
 export type GetCoursesResponse = {
-  items: CourseItemResponse[];
+  items: CourseListItemResponse[];
   pagination: {
     page: number;
     limit: number;
@@ -24,18 +29,24 @@ export type GetCoursesResponse = {
   };
 };
 
-export type GetCourseResponse = {
+export type CourseDetailsResponse = {
   id: string;
   title: string;
-  description: string;
+  description: string | null;
   topic: string;
+  level: string | null;
   createdAt: Date;
-  chapters: {
+  updatedAt: Date;
+  modules: {
     id: string;
     title: string;
     order: number;
-    points: string[];
-    completed: boolean;
+    topics: {
+      id: string;
+      title: string;
+      order: number;
+      isCompleted: boolean;
+    }[];
   }[];
   resources: {
     id: string;
@@ -45,19 +56,25 @@ export type GetCourseResponse = {
   }[];
 };
 
-export type UpdateChapterResponse = {
-  id: string;
-  completed: boolean;
-  courseProgress: {
-    completed: number;
-    total: number;
-    percentage: number;
-  };
-};
-
-export type CourseResourceResponse = {
+export type CourseTopicResponse = {
   id: string;
   title: string;
-  url: string;
-  type: string;
+  order: number;
+  content: string | null;
+  isCompleted: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type ToggleTopicCompletionResponse = {
+  id: string;
+  isCompleted: boolean;
+};
+
+export type CourseStatsResponse = {
+  totalCourses: number;
+  totalModules: number;
+  totalTopics: number;
+  completedTopics: number;
+  completionRate: number;
 };

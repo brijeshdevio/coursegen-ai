@@ -1,6 +1,6 @@
 import { apiClient } from "@/lib/apiClient";
 import type { Generate } from "./schema/generate.schema";
-import type { GetCoursesParams } from "@/types/course";
+import type { CourseType, GetCoursesParams } from "@/types/course";
 
 export const courseService = {
   getCourses: (params?: GetCoursesParams) =>
@@ -9,4 +9,6 @@ export const courseService = {
     apiClient.get(`/courses/${id}`).then((r) => r.data),
   generate: (data: Generate) =>
     apiClient.post("/courses/generate", data).then((r) => r.data),
+  saveCourse: (data: CourseType) =>
+    apiClient.post("/courses/save", data).then((r) => r.data),
 };

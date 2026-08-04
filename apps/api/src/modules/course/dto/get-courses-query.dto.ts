@@ -7,7 +7,13 @@ export const GetCoursesQuerySchema = z
 
     limit: z.coerce.number().int().min(1).max(100).default(10),
 
-    search: z.string().trim().min(1, 'Search cannot be empty.').optional(),
+    search: z
+      .string()
+      .trim()
+      .max(200, 'Search cannot exceed 200 characters.')
+      .optional(),
+
+    level: z.string().trim().max(50).optional(),
   })
   .strict();
 

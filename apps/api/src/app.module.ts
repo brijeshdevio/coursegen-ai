@@ -8,6 +8,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { CourseModule } from './modules/course/course.module';
 import { UserModule } from './modules/user/user.module';
 import { AiModule } from './modules/ai/ai.module';
+import { CourseModule } from './modules/course/course.module';
 
 @Module({
   imports: [
