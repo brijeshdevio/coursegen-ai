@@ -13,10 +13,32 @@ import { useCourses } from "@/features/course/hooks/useCourses";
 import { CourseCardSkeleton } from "@/features/course/components/CourseCardSkeleton";
 import { CourseCard } from "@/features/course/components/CourseCard";
 import type { CourseCardType } from "@/types/course";
+import { useState } from "react";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export default function Courses() {
-  const { data, isPending } = useCourses();
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  const debounceSearch = useDebounce((value: string) => {
+    setDebouncedSearch(value);
+    setPage(1);
+  }, 500);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
+    debounceSearch(e.target.value);
+  };
+
+  const { data, isPending } = useCourses({
+    page,
+    limit: 6,
+    search: debouncedSearch || undefined,
+  });
+  
   const items: CourseCardType[] = data?.items || [];
+  const pagination = data?.pagination;
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-10">
@@ -27,7 +49,7 @@ export default function Courses() {
             My courses
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {23} courses in your library.
+            {pagination?.total || 0} courses in your library.
           </p>
         </div>
         <Button asChild size="lg" className="gap-2">
@@ -38,7 +60,7 @@ export default function Courses() {
       </div>
       {/* Stats */}
       <div className="mt-8 flex flex-wrap items-center gap-6 rounded-2xl border border-border bg-card px-6 py-4">
-        <Stat label="Total" value={23} />
+        <Stat label="Total" value={pagination?.total || 0} />
         <Divider />
         <Stat label="In progress" value={12} accent="primary" />
         <Divider />
@@ -48,7 +70,12 @@ export default function Courses() {
       <div className="mt-6 flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">
           <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Search courses..." className="pl-9" />
+          <Input 
+            placeholder="Search courses..." 
+            className="pl-9" 
+            value={search}
+            onChange={handleSearchChange}
+          />
         </div>
         <Select>
           <SelectTrigger className="w-full sm:w-48">
@@ -73,7 +100,32 @@ export default function Courses() {
               <CourseCard key={course.id} course={course} />
             ))}
       </div>
-      {items.length == 0 && <EmptyState hasAny={items.length > 0} />}
+      {items.length == 0 && <EmptyState hasAny={debouncedSearch !== ""} />}
+
+      {/* Pagination Controls */}
+      {pagination && pagination.totalPages > 1 && (
+        <div className="mt-8 flex items-center justify-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage(page - 1)}
+            disabled={page === 1}
+          >
+            Previous
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            Page {pagination.page} of {pagination.totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage(page + 1)}
+            disabled={page === pagination.totalPages}
+          >
+            Next
+          </Button>
+        </div>
+      )}
     </main>
   );
 }
@@ -119,7 +171,7 @@ function EmptyState({ hasAny }: { hasAny: boolean }) {
           <BookOpen className="h-6 w-6" />
         )}
       </div>
-      <h3 className="font-display mt-6 text-2xl font-bold">
+      <h3 className="mt-6 font-display text-2xl font-bold">
         {hasAny ? "No courses match" : "No courses yet"}
       </h3>
       <p className="mt-2 max-w-sm text-sm text-muted-foreground">

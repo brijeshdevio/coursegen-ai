@@ -27,3 +27,9 @@ export type CourseType = {
     type: string;
   }[];
 };
+
+export interface GetCoursesParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+}
