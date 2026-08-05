@@ -17,6 +17,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Link, NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 export function Logo({ className = "" }: { className?: string }) {
   return (
@@ -96,21 +97,21 @@ export function MarketingNavbar() {
               <a
                 href="#how"
                 onClick={() => setOpen(false)}
-                className="hover:bg-elevated rounded-md px-3 py-2"
+                className="rounded-md px-3 py-2 hover:bg-elevated"
               >
                 How it works
               </a>
               <a
                 href="#features"
                 onClick={() => setOpen(false)}
-                className="hover:bg-elevated rounded-md px-3 py-2"
+                className="rounded-md px-3 py-2 hover:bg-elevated"
               >
                 Features
               </a>
               <a
                 href="#example"
                 onClick={() => setOpen(false)}
-                className="hover:bg-elevated rounded-md px-3 py-2"
+                className="rounded-md px-3 py-2 hover:bg-elevated"
               >
                 Example
               </a>
@@ -130,10 +131,8 @@ export function MarketingNavbar() {
 
 export function AppNavbar() {
   const navigate = useNavigate();
-  const user = {
-    name: "Alex",
-    email: "alex@hot.com",
-  };
+  const { isAuthenticated, user } = useAuth();
+
   const getActiveStyle = (isActive: boolean = false): string => {
     return isActive
       ? "text-sm text-foreground font-medium"
@@ -147,13 +146,13 @@ export function AppNavbar() {
           <Logo />
           <nav className="hidden items-center gap-6 md:flex">
             <NavLink
-              to="/"
+              to="/courses"
               className={({ isActive }) => getActiveStyle(isActive)}
             >
               My courses
             </NavLink>
             <NavLink
-              to="/"
+              to="/courses/generate"
               className={({ isActive }) => getActiveStyle(isActive)}
             >
               Generate
@@ -162,11 +161,11 @@ export function AppNavbar() {
         </div>
         <div className="flex items-center gap-3">
           <Button size="sm" className="hidden sm:inline-flex">
-            <Link to="/">+ New course</Link>
+            <Link to="/courses/generate">+ New course</Link>
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <button className="bg-elevated grid h-9 w-9 place-items-center rounded-full text-sm font-semibold ring-1 ring-border transition hover:ring-primary/40">
+              <button className="grid h-9 w-9 place-items-center rounded-full bg-elevated text-sm font-semibold ring-1 ring-border transition hover:ring-primary/40">
                 <UserIcon className="h-4 w-4" />
               </button>
             </DropdownMenuTrigger>
@@ -174,12 +173,12 @@ export function AppNavbar() {
               align="end"
               className="w-56 border-border bg-card"
             >
-              {user ? (
+              {isAuthenticated ? (
                 <>
                   <DropdownMenuLabel className="flex flex-col">
-                    <span className="text-sm font-medium">{user.name}</span>
+                    <span className="text-sm font-medium">{user?.name}</span>
                     <span className="text-xs text-muted-foreground">
-                      {user.email}
+                      {user?.email}
                     </span>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
@@ -189,10 +188,10 @@ export function AppNavbar() {
                 </>
               ) : (
                 <>
-                  <DropdownMenuItem onClick={() => navigate("/")}>
+                  <DropdownMenuItem onClick={() => navigate("/login")}>
                     Login
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/")}>
+                  <DropdownMenuItem onClick={() => navigate("/signup")}>
                     Sign up
                   </DropdownMenuItem>
                 </>

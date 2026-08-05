@@ -2,13 +2,6 @@ import { BookOpen, Plus, Search, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useCourses } from "@/features/course/hooks/useCourses";
 import { CourseCardSkeleton } from "@/features/course/components/CourseCardSkeleton";
 import { CourseCard } from "@/features/course/components/CourseCard";
