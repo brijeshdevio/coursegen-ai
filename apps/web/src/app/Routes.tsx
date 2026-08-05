@@ -1,4 +1,3 @@
-import { ProtectedLayout } from "@/components/layout/ProtectedLayout";
 import { lazy } from "react";
 import {
   BrowserRouter,
@@ -6,24 +5,22 @@ import {
   Route,
 } from "react-router-dom";
 
-const Index = lazy(() => import("@/pages/public/Index"));
+const Index = lazy(() => import("@/pages/public/Home"));
 const Signup = lazy(() => import("@/pages/auth/Signup"));
 const Login = lazy(() => import("@/pages/auth/Login"));
 const Courses = lazy(() => import("@/pages/course/Courses"));
-const Generate = lazy(() => import("@/pages/course/Generate"));
-const Course = lazy(() => import("@/pages/course/Course"));
 
 export default function Routes() {
   return (
     <BrowserRouter>
       <RoutesWrapper>
         <Route path="/" element={<Index />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/login" element={<Login />} />
-        <Route element={<ProtectedLayout />}>
+        <Route>
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
+        </Route>
+        <Route>
           <Route path="/courses" element={<Courses />} />
-          <Route path="/courses/generate" element={<Generate />} />
-          <Route path="/courses/:id" element={<Course />} />
         </Route>
       </RoutesWrapper>
     </BrowserRouter>
