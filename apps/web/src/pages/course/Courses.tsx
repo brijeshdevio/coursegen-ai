@@ -36,7 +36,7 @@ export default function Courses() {
     limit: 6,
     search: debouncedSearch || undefined,
   });
-  
+
   const items: CourseCardType[] = data?.items || [];
   const pagination = data?.pagination;
 
@@ -53,7 +53,7 @@ export default function Courses() {
           </p>
         </div>
         <Button asChild size="lg" className="gap-2">
-          <Link to="/generate">
+          <Link to="/courses/generate">
             <Plus className="h-4 w-4" /> Generate new course
           </Link>
         </Button>
@@ -70,24 +70,13 @@ export default function Courses() {
       <div className="mt-6 flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">
           <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input 
-            placeholder="Search courses..." 
-            className="pl-9" 
+          <Input
+            placeholder="Search courses..."
+            className="pl-9"
             value={search}
             onChange={handleSearchChange}
           />
         </div>
-        <Select>
-          <SelectTrigger className="w-full sm:w-48">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All topics</SelectItem>
-            <SelectItem value="not-started">Not started</SelectItem>
-            <SelectItem value="in-progress">In progress</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
       {/* Grid */}
       <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
