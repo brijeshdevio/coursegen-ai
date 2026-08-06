@@ -5,6 +5,8 @@ import {
   Route,
 } from "react-router-dom";
 
+import { ProtectedLayout } from "@/components/layout/ProtectedLayout";
+
 const Index = lazy(() => import("@/pages/public/Home"));
 const Signup = lazy(() => import("@/pages/auth/Signup"));
 const Login = lazy(() => import("@/pages/auth/Login"));
@@ -19,7 +21,7 @@ export default function Routes() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
         </Route>
-        <Route>
+        <Route element={<ProtectedLayout />}>
           <Route path="/courses" element={<Courses />} />
         </Route>
       </RoutesWrapper>
