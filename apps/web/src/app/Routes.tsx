@@ -11,6 +11,7 @@ const Index = lazy(() => import("@/pages/public/Home"));
 const Signup = lazy(() => import("@/pages/auth/Signup"));
 const Login = lazy(() => import("@/pages/auth/Login"));
 const Courses = lazy(() => import("@/pages/course/Courses"));
+const CourseDetails = lazy(() => import("@/pages/course/CourseDetails"));
 
 export default function Routes() {
   return (
@@ -23,6 +24,7 @@ export default function Routes() {
         </Route>
         <Route element={<ProtectedLayout />}>
           <Route path="/courses" element={<Courses />} />
+          <Route path="/courses/:id" element={<CourseDetails />} />
         </Route>
       </RoutesWrapper>
     </BrowserRouter>

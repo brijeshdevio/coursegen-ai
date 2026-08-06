@@ -26,3 +26,30 @@ export type GetCoursesQuery = {
   search?: string;
   level?: string;
 };
+
+export type CourseDetailsResponse = {
+  id: string;
+  title: string;
+  description: string | null;
+  topic: string;
+  level: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  modules: {
+    id: string;
+    title: string;
+    order: number;
+    topics: {
+      id: string;
+      title: string;
+      order: number;
+      isCompleted: boolean;
+    }[];
+  }[];
+  resources: {
+    id: string;
+    title: string;
+    url: string;
+    type: string;
+  }[];
+};
