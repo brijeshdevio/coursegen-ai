@@ -12,6 +12,7 @@ const Signup = lazy(() => import("@/pages/auth/Signup"));
 const Login = lazy(() => import("@/pages/auth/Login"));
 const Courses = lazy(() => import("@/pages/course/Courses"));
 const CourseDetails = lazy(() => import("@/pages/course/CourseDetails"));
+const CourseTopic = lazy(() => import("@/pages/course/CourseTopic"));
 
 export default function Routes() {
   return (
@@ -25,6 +26,10 @@ export default function Routes() {
         <Route element={<ProtectedLayout />}>
           <Route path="/courses" element={<Courses />} />
           <Route path="/courses/:id" element={<CourseDetails />} />
+          <Route
+            path="/courses/:id/topics/:topicId"
+            element={<CourseTopic />}
+          />
         </Route>
       </RoutesWrapper>
     </BrowserRouter>

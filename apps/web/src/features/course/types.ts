@@ -53,3 +53,13 @@ export type CourseDetailsResponse = {
     type: string;
   }[];
 };
+
+export type CourseTopicResponse = {
+  id: string;
+  title: string;
+  order: number;
+  content: string | null;
+  isCompleted: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
