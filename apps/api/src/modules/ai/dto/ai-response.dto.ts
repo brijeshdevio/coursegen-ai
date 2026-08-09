@@ -1,5 +1,4 @@
-import { createZodDto } from 'nestjs-zod';
-import z from 'zod';
+import { z } from 'zod';
 
 const TopicSchema = z.object({
   title: z.string().min(1),
@@ -18,7 +17,7 @@ const ResourceSchema = z.object({
   type: z.enum(['youtube', 'article', 'docs']),
 });
 
-export const SaveCourseSchema = z.object({
+export const CourseResponseSchema = z.object({
   title: z.string().min(3).max(100),
   description: z.string().min(1),
   topic: z.string().min(1),
@@ -27,4 +26,4 @@ export const SaveCourseSchema = z.object({
   resources: z.array(ResourceSchema).min(5).max(15),
 });
 
-export class SaveCourseDto extends createZodDto(SaveCourseSchema) {}
+export type CourseResponse = z.infer<typeof CourseResponseSchema>;

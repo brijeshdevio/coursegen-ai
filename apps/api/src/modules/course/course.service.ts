@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { PrismaService } from '../../prisma/prisma.service';
 import { Prisma } from '../../generated/prisma/client';
@@ -16,54 +12,11 @@ import {
   SaveCourseResponse,
   ToggleTopicCompletionResponse,
 } from './course.types';
-import { GenerateCourseDto } from './dto/generate-course.dto';
 import { GetCoursesQueryDto } from './dto/get-courses-query.dto';
 
 @Injectable()
 export class CourseService {
   constructor(private readonly prismaService: PrismaService) {}
-
-  async generateCourse(dto: GenerateCourseDto): Promise<SaveCourseDto> {
-    return {
-      title: `Complete ${dto.topic}`,
-      description: `A comprehensive ${dto.level.toLowerCase()} course on ${dto.topic}.`,
-      topic: dto.topic,
-      level: dto.level,
-      modules: [
-        {
-          title: 'Module 1',
-          order: 1,
-          topics: [
-            {
-              title: 'Topic 1',
-              order: 1,
-            },
-            {
-              title: 'Topic 2',
-              order: 2,
-            },
-          ],
-        },
-        {
-          title: 'Module 2',
-          order: 2,
-          topics: [
-            {
-              title: 'Topic 3',
-              order: 1,
-            },
-          ],
-        },
-      ],
-      resources: [
-        {
-          title: `${dto.topic} Official Documentation`,
-          url: 'https://example.com',
-          type: 'Documentation',
-        },
-      ],
-    };
-  }
 
   async saveCourse(
     userId: string,

@@ -35,40 +35,247 @@ POST {{base_url}}/courses/save
 Content-Type: application/json
 
 {
-  "title": "Complete C++ Programming Course",
-  "description": "C++ is a powerful, high-performance programming language used for system software, games and competitive programming.",
-  "topic": "C++",
-  "chapters": [
-    {
-      "order": 1,
-      "title": "Introduction to C++",
-      "topic": [
-        "What is C++?",
-        "History of C++",
-        "Setting up environment"
-      ]
-    },
-    {
-      "order": 2,
-      "title": "Variables & Data Types",
-      "points": [
-        "Primitive types",
-        "Type casting"
-      ]
-    }
-  ],
-  "resources": [
-    {
-      "title": "C++ Full Course — freeCodeCamp",
-      "url": "https://youtube.com/watch?v=xxx",
-      "type": "youtube"
-    },
-    {
-      "title": "cppreference.com",
-      "url": "https://cppreference.com",
-      "type": "docs"
-    }
-  ]
+    "title": "Mastering ReactJS",
+    "description": "Build complex React applications",
+    "topic": "ReactJS",
+    "level": "INTERMEDIATE",
+    "modules": [
+      {
+        "order": 1,
+        "title": "React Fundamentals Review",
+        "topics": [
+          {
+            "title": "JSX Syntax and Best Practices",
+            "order": 1
+          },
+          {
+            "title": "Component Lifecycle Methods",
+            "order": 2
+          },
+          {
+            "title": "State and Props Management",
+            "order": 3
+          },
+          {
+            "title": "Event Handling in React",
+            "order": 4
+          },
+          {
+            "title": "React Component Types",
+            "order": 5
+          }
+        ]
+      },
+      {
+        "order": 2,
+        "title": "React Hooks and Context API",
+        "topics": [
+          {
+            "title": "Introduction to React Hooks",
+            "order": 1
+          },
+          {
+            "title": "Using useState and useEffect Hooks",
+            "order": 2
+          },
+          {
+            "title": "Context API and Global State Management",
+            "order": 3
+          },
+          {
+            "title": "Custom Hooks and Best Practices",
+            "order": 4
+          },
+          {
+            "title": "Optimizing Performance with Hooks",
+            "order": 5
+          }
+        ]
+      },
+      {
+        "order": 3,
+        "title": "React Router and Navigation",
+        "topics": [
+          {
+            "title": "Introduction to React Router",
+            "order": 1
+          },
+          {
+            "title": "Setting up Routes and Navigation",
+            "order": 2
+          },
+          {
+            "title": "Route Parameters and Query Strings",
+            "order": 3
+          },
+          {
+            "title": "Protected Routes and Authentication",
+            "order": 4
+          },
+          {
+            "title": "Optimizing Route Configuration",
+            "order": 5
+          }
+        ]
+      },
+      {
+        "order": 4,
+        "title": "State Management with Redux",
+        "topics": [
+          {
+            "title": "Introduction to Redux and State Management",
+            "order": 1
+          },
+          {
+            "title": "Setting up Redux Store and Actions",
+            "order": 2
+          },
+          {
+            "title": "Using Redux with React Components",
+            "order": 3
+          },
+          {
+            "title": "Managing Side Effects with Redux",
+            "order": 4
+          },
+          {
+            "title": "Optimizing Redux Performance",
+            "order": 5
+          }
+        ]
+      },
+      {
+        "order": 5,
+        "title": "React Best Practices and Optimization",
+        "topics": [
+          {
+            "title": "Code Organization and Structure",
+            "order": 1
+          },
+          {
+            "title": "Performance Optimization Techniques",
+            "order": 2
+          },
+          {
+            "title": "Debugging and Error Handling",
+            "order": 3
+          },
+          {
+            "title": "Testing and Validation",
+            "order": 4
+          },
+          {
+            "title": "Security Considerations in React",
+            "order": 5
+          }
+        ]
+      },
+      {
+        "order": 6,
+        "title": "React and TypeScript",
+        "topics": [
+          {
+            "title": "Introduction to TypeScript and React",
+            "order": 1
+          },
+          {
+            "title": "Setting up TypeScript with React",
+            "order": 2
+          },
+          {
+            "title": "Type Checking and Inference",
+            "order": 3
+          },
+          {
+            "title": "Using TypeScript with React Hooks",
+            "order": 4
+          },
+          {
+            "title": "Best Practices for TypeScript in React",
+            "order": 5
+          }
+        ]
+      },
+      {
+        "order": 7,
+        "title": "React and Server-Side Rendering",
+        "topics": [
+          {
+            "title": "Introduction to Server-Side Rendering",
+            "order": 1
+          },
+          {
+            "title": "Setting up Server-Side Rendering with React",
+            "order": 2
+          },
+          {
+            "title": "Using Next.js for Server-Side Rendering",
+            "order": 3
+          },
+          {
+            "title": "Optimizing Server-Side Rendering Performance",
+            "order": 4
+          },
+          {
+            "title": "Common Pitfalls and Solutions",
+            "order": 5
+          }
+        ]
+      },
+      {
+        "order": 8,
+        "title": "React and GraphQL",
+        "topics": [
+          {
+            "title": "Introduction to GraphQL and React",
+            "order": 1
+          },
+          {
+            "title": "Setting up GraphQL with React",
+            "order": 2
+          },
+          {
+            "title": "Using Apollo Client with React",
+            "order": 3
+          },
+          {
+            "title": "Optimizing GraphQL Performance",
+            "order": 4
+          },
+          {
+            "title": "Best Practices for GraphQL in React",
+            "order": 5
+          }
+        ]
+      }
+    ],
+    "resources": [
+      {
+        "title": "React Official Documentation",
+        "url": "https://reactjs.org/docs/getting-started.html",
+        "type": "docs"
+      },
+      {
+        "title": "React Tutorial by Traversy Media",
+        "url": "https://www.youtube.com/watch?v=w7ejDZ8SWv8",
+        "type": "youtube"
+      },
+      {
+        "title": "React Hooks Guide by FreeCodeCamp",
+        "url": "https://www.freecodecamp.org/news/the-ultimate-guide-to-react-hooks-6f14042b1d4c/",
+        "type": "article"
+      },
+      {
+        "title": "React Router Documentation",
+        "url": "https://reactrouter.com/web/guides/quick-start",
+        "type": "docs"
+      },
+      {
+        "title": "Redux Official Documentation",
+        "url": "https://redux.js.org/introduction/getting-started",
+        "type": "docs"
+      }
+    ]
 }
 
 
@@ -126,5 +333,5 @@ POST {{base_url}}/courses/generate
 Content-Type: application/json
 
 {
-  "topic": "C++"
+  "topic": "ReactJS"
 }

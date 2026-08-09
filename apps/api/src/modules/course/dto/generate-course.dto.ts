@@ -8,9 +8,11 @@ export const GenerateCourseSchema = z
       .min(2, 'Topic must be at least 2 characters.')
       .max(200, 'Topic cannot exceed 200 characters.'),
 
-    level: z.enum(['BEGINNER', 'INTERMEDIATE', 'ADVANCED'], {
-      error: 'Please select a valid course level.',
-    }),
+    level: z
+      .enum(['BEGINNER', 'INTERMEDIATE', 'ADVANCED'], {
+        error: 'Please select a valid course level.',
+      })
+      .default('INTERMEDIATE'),
   })
   .strict();
 

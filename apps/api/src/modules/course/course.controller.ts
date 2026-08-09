@@ -15,6 +15,7 @@ import { User } from '../../common/decorators';
 import { ValidationPipe } from '../../common/pipes';
 import { apiSuccessResponse } from '../../common/helpers';
 
+import { AiService } from '../ai/ai.service';
 import { SaveCourseDto, SaveCourseSchema } from './dto/save-course.dto';
 import { CourseService } from './course.service';
 import {
@@ -29,14 +30,17 @@ import {
 @UseGuards(JwtAuthGuard)
 @Controller('courses')
 export class CourseController {
-  constructor(private readonly courseService: CourseService) {}
+  constructor(
+    private readonly courseService: CourseService,
+    private readonly aiService: AiService,
+  ) {}
 
   @Post('generate')
   async generateCourse(
     @Body(new ValidationPipe(GenerateCourseSchema))
     body: GenerateCourseDto,
   ) {
-    const data = await this.courseService.generateCourse(body);
+    const data = await this.aiService.generateCourse(body);
 
     return apiSuccessResponse({
       message: 'Course generated successfully.',
