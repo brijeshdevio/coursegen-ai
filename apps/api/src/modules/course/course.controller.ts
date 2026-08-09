@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -8,12 +9,14 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { CourseService } from './course.service';
+
 import { JwtAuthGuard } from '../../common/guards';
 import { User } from '../../common/decorators';
 import { ValidationPipe } from '../../common/pipes';
-import { SaveCourseDto, SaveCourseSchema } from './dto/save-course.dto';
 import { apiSuccessResponse } from '../../common/helpers';
+
+import { SaveCourseDto, SaveCourseSchema } from './dto/save-course.dto';
+import { CourseService } from './course.service';
 import {
   GenerateCourseDto,
   GenerateCourseSchema,
@@ -87,13 +90,13 @@ export class CourseController {
     return apiSuccessResponse({ data });
   }
 
-  @Patch(':id/topics/:topicId/toggle-complete')
-  async toggleTopicCompletion(
+  @Patch(':id/topics/:topicId/completion')
+  async updateTopicCompletion(
     @User('id') userId: string,
     @Param('id') courseId: string,
     @Param('topicId') topicId: string,
   ) {
-    const data = await this.courseService.toggleTopicCompletion(
+    const data = await this.courseService.updateTopicCompletion(
       userId,
       courseId,
       topicId,
@@ -112,5 +115,18 @@ export class CourseController {
     const data = await this.courseService.getCourseStats(userId);
 
     return apiSuccessResponse({ data });
+  }
+
+  @Delete(':id')
+  async deleteCourse(
+    @User('id') userId: string,
+    @Param('id') courseId: string,
+  ) {
+    await this.courseService.deleteCourse(userId, courseId);
+
+    return apiSuccessResponse({
+      message: 'Course deleted successfully.',
+      data: null,
+    });
   }
 }

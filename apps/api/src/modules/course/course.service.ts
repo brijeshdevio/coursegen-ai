@@ -6,6 +6,7 @@ import {
 
 import { PrismaService } from '../../prisma/prisma.service';
 import { Prisma } from '../../generated/prisma/client';
+
 import { SaveCourseDto } from './dto/save-course.dto';
 import {
   CourseDetailsResponse,
@@ -264,7 +265,7 @@ export class CourseService {
     });
 
     if (!course) {
-      throw new NotFoundException('Course not found.');
+      throw new NotFoundException('No course found with this ID.');
     }
 
     return course;
@@ -306,7 +307,7 @@ export class CourseService {
     return topic;
   }
 
-  async toggleTopicCompletion(
+  async updateTopicCompletion(
     userId: string,
     courseId: string,
     topicId: string,

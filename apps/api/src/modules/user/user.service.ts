@@ -27,9 +27,9 @@ export class UserService {
         createdAt: true,
         courses: {
           select: {
-            chapters: {
+            modules: {
               select: {
-                completed: true,
+                topics: true,
               },
             },
           },
@@ -42,11 +42,13 @@ export class UserService {
     }
 
     const completedCourses = user.courses.filter((course) => {
-      if (course.chapters.length === 0) {
+      if (course.modules.length === 0) {
         return false;
       }
 
-      return course.chapters.every((chapter) => chapter.completed);
+      return course.modules.every((module) =>
+        module.topics.every((topic) => topic.isCompleted),
+      );
     }).length;
 
     return {
@@ -100,7 +102,7 @@ export class UserService {
       },
       select: {
         id: true,
-        password: true,
+        passwordHash: true,
       },
     });
 
@@ -109,7 +111,7 @@ export class UserService {
     }
 
     const isPasswordValid = await argon2.verify(
-      user.password,
+      user.passwordHash,
       dto.currentPassword,
     );
 
@@ -117,7 +119,10 @@ export class UserService {
       throw new BadRequestException('Current password is incorrect.');
     }
 
-    const isSamePassword = await argon2.verify(user.password, dto.newPassword);
+    const isSamePassword = await argon2.verify(
+      user.passwordHash,
+      dto.newPassword,
+    );
 
     if (isSamePassword) {
       throw new BadRequestException(
@@ -132,7 +137,7 @@ export class UserService {
         id: userId,
       },
       data: {
-        password: passwordHash,
+        passwordHash: passwordHash,
       },
     });
   }

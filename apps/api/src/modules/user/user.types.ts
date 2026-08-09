@@ -1,6 +1,6 @@
 export type GetProfileResponse = {
   id: string;
-  name: string;
+  name: string | null;
   email: string;
   totalCourses: number;
   completedCourses: number;
@@ -9,6 +9,6 @@ export type GetProfileResponse = {
 
 export type UpdateProfileResponse = {
   id: string;
-  name: string;
+  name: string | null;
   email: string;
 };

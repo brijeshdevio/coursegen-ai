@@ -1,15 +1,14 @@
-export type RegisterUserResponse = {
+export type SignupResponse = {
   id: string;
-  name: string;
+  name: string | null;
   email: string;
-  createdAt: Date;
 };
 
-export type LoginUserResponse = {
-  accessToken: string;
+export type LoginResponse = {
   user: {
     id: string;
-    name: string;
+    name: string | null;
     email: string;
   };
+  accessToken: string;
 };

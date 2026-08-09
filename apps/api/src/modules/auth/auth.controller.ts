@@ -1,45 +1,44 @@
 import { Body, Controller, Post, Res, UseGuards } from '@nestjs/common';
-import { type Response } from 'express';
+import type { Response } from 'express';
 
+import { ValidationPipe } from '../../common/pipes';
 import {
   apiSuccessResponse,
   clearAllCookies,
   setSessionCookie,
 } from '../../common/helpers';
-import { ValidationPipe } from '../../common/pipes';
 import { JwtAuthGuard } from '../../common/guards';
 
 import { AuthService } from './auth.service';
-import { RegisterUserDto, RegisterUserSchema } from './dto/register.dto';
-import { LoginUserDto, LoginUserSchema } from './dto/login.dto';
+import { SignupDto, SignupSchema } from './dto/signup.dto';
+import { LoginDto, LoginSchema } from './dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('register')
-  async register(
-    @Body(new ValidationPipe(RegisterUserSchema))
-    body: RegisterUserDto,
-  ) {
-    const data = await this.authService.register(body);
-
+  @Post('signup')
+  async signup(@Body(new ValidationPipe(SignupSchema)) body: SignupDto) {
+    const result = await this.authService.signup(body);
     return apiSuccessResponse({
-      message: 'User registered successfully.',
-      data,
+      message: 'User signed up successfully',
+      data: result,
     });
   }
 
   @Post('login')
   async login(
-    @Body(new ValidationPipe(LoginUserSchema))
-    body: LoginUserDto,
+    @Body(new ValidationPipe(LoginSchema)) body: LoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { user, accessToken } = await this.authService.login(body);
-    setSessionCookie(res, accessToken);
+    const result = await this.authService.login(body);
 
-    return apiSuccessResponse({ message: 'Login successful.', data: user });
+    setSessionCookie(res, result.accessToken);
+
+    return apiSuccessResponse({
+      message: 'User logged in successfully',
+      data: result.user,
+    });
   }
 
   @Post('logout')
@@ -47,6 +46,8 @@ export class AuthController {
   logout(@Res({ passthrough: true }) res: Response) {
     clearAllCookies(res);
 
-    return apiSuccessResponse({ message: 'Logout successful.' });
+    return apiSuccessResponse({
+      message: 'User logged out successfully',
+    });
   }
 }

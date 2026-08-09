@@ -6,7 +6,7 @@ GET {{base_url}}
 
 
 ###
-POST {{base_url}}/auth/register
+POST {{base_url}}/auth/signup
 Content-Type: application/json
 
 {
@@ -42,7 +42,7 @@ Content-Type: application/json
     {
       "order": 1,
       "title": "Introduction to C++",
-      "points": [
+      "topic": [
         "What is C++?",
         "History of C++",
         "Setting up environment"
