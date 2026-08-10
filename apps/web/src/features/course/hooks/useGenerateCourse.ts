@@ -25,6 +25,7 @@ export const useGenerateCourseFacade = () => {
     register,
     formState: { errors },
     getValues,
+    setValue,
   } = useForm<GenerateCourse>({
     resolver: zodResolver(GenerateCourseSchema),
   });
@@ -38,5 +39,6 @@ export const useGenerateCourseFacade = () => {
     errors,
     isSuccess,
     getValues,
+    setValue,
   };
 };

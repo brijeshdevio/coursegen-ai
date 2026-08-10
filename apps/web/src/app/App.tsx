@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
+import { AuthProvider } from "@/providers/AuthProvider";
 
 import Routes from "./Routes";
 
@@ -9,7 +10,9 @@ export function App() {
   return (
     <>
       <QueryClientProvider client={queryClient}>
-        <Routes />
+        <AuthProvider>
+          <Routes />
+        </AuthProvider>
       </QueryClientProvider>
       <Toaster />
     </>

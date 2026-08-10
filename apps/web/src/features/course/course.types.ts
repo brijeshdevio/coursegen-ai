@@ -52,6 +52,8 @@ export type CourseTopic = {
   isCompleted: boolean;
   createdAt: Date;
   updatedAt: Date;
+  next?: string;
+  prev?: string;
 };
 
 export type ToggleTopicCompletion = { id: string; isCompleted: boolean };
