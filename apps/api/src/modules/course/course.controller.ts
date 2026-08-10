@@ -69,6 +69,13 @@ export class CourseController {
     return apiSuccessResponse({ data });
   }
 
+  @Get('stats')
+  async getCourseStats(@User('id') userId: string) {
+    const data = await this.courseService.getCourseStats(userId);
+
+    return apiSuccessResponse({ data });
+  }
+
   @Get(':id')
   async getCourseById(
     @User('id') userId: string,
@@ -112,13 +119,6 @@ export class CourseController {
         : 'Topic marked as incomplete successfully.',
       data,
     });
-  }
-
-  @Get('stats')
-  async getCourseStats(@User('id') userId: string) {
-    const data = await this.courseService.getCourseStats(userId);
-
-    return apiSuccessResponse({ data });
   }
 
   @Delete(':id')
