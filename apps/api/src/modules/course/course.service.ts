@@ -13,10 +13,14 @@ import {
   ToggleTopicCompletionResponse,
 } from './course.types';
 import { GetCoursesQueryDto } from './dto/get-courses-query.dto';
+import { AiService } from '../ai/ai.service';
 
 @Injectable()
 export class CourseService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly aiService: AiService,
+  ) {}
 
   async saveCourse(
     userId: string,
@@ -229,6 +233,7 @@ export class CourseService {
     courseId: string,
     topicId: string,
   ): Promise<CourseTopicResponse> {
+    // First, get the current topic
     const topic = await this.prismaService.topic.findFirst({
       where: {
         id: topicId,
@@ -248,6 +253,20 @@ export class CourseService {
         isCompleted: true,
         createdAt: true,
         updatedAt: true,
+        moduleId: true,
+        module: {
+          select: {
+            title: true,
+            order: true,
+            course: {
+              select: {
+                title: true,
+                level: true,
+                id: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -257,7 +276,115 @@ export class CourseService {
       );
     }
 
-    return topic;
+    // Get all topics in the course ordered by module and topic order
+    const allTopics = await this.prismaService.topic.findMany({
+      where: {
+        module: {
+          courseId: courseId,
+          course: {
+            userId,
+            deletedAt: null,
+          },
+        },
+      },
+      select: {
+        id: true,
+        title: true,
+        order: true,
+        moduleId: true,
+        module: {
+          select: {
+            order: true,
+          },
+        },
+      },
+      orderBy: [
+        {
+          module: {
+            order: 'asc',
+          },
+        },
+        {
+          order: 'asc',
+        },
+      ],
+    });
+
+    // Find current topic index
+    const currentIndex = allTopics.findIndex((t) => t.id === topicId);
+
+    // Get previous and next topics
+    const previousTopic = currentIndex > 0 ? allTopics[currentIndex - 1] : null;
+    const nextTopic =
+      currentIndex < allTopics.length - 1 ? allTopics[currentIndex + 1] : null;
+
+    // Generate content if needed
+    if (!topic.content) {
+      const topicContent = await this.aiService.generateCourseTopic({
+        courseTitle: topic.module.course.title,
+        moduleTitle: topic.module.title,
+        topicTitle: topic.title,
+        level: topic.module.course.level as
+          'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED',
+      });
+
+      await this.prismaService.topic.update({
+        where: {
+          id: topic.id,
+        },
+        data: {
+          content: topicContent,
+        },
+      });
+
+      return {
+        id: topic.id,
+        title: topic.title,
+        order: topic.order,
+        isCompleted: topic.isCompleted,
+        createdAt: topic.createdAt,
+        updatedAt: topic.updatedAt,
+        content: topicContent,
+        previousTopic: previousTopic
+          ? {
+              id: previousTopic.id,
+              title: previousTopic.title,
+              order: previousTopic.order,
+            }
+          : null,
+        nextTopic: nextTopic
+          ? {
+              id: nextTopic.id,
+              title: nextTopic.title,
+              order: nextTopic.order,
+            }
+          : null,
+      };
+    }
+
+    return {
+      id: topic.id,
+      title: topic.title,
+      order: topic.order,
+      isCompleted: topic.isCompleted,
+      createdAt: topic.createdAt,
+      updatedAt: topic.updatedAt,
+      content: topic.content,
+      previousTopic: previousTopic
+        ? {
+            id: previousTopic.id,
+            title: previousTopic.title,
+            order: previousTopic.order,
+          }
+        : null,
+      nextTopic: nextTopic
+        ? {
+            id: nextTopic.id,
+            title: nextTopic.title,
+            order: nextTopic.order,
+          }
+        : null,
+    };
   }
 
   async updateTopicCompletion(

@@ -48,12 +48,20 @@ export type CourseTopic = {
   id: string;
   title: string;
   order: number;
-  content: string | null;
+  content: string;
   isCompleted: boolean;
   createdAt: Date;
   updatedAt: Date;
-  next?: string;
-  prev?: string;
+  previousTopic: {
+    id: string;
+    title: string;
+    order: number;
+  } | null;
+  nextTopic: {
+    id: string;
+    title: string;
+    order: number;
+  } | null;
 };
 
 export type ToggleTopicCompletion = { id: string; isCompleted: boolean };

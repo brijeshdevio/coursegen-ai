@@ -1,534 +1,410 @@
 import { useState, useEffect, useRef, useMemo } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useGetCourseTopic } from "@/features/course/hooks/useGetCourseTopic";
 import { useUpdateTopicCompletion } from "@/features/course/hooks/useUpdateTopicCompletion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import {
   ArrowLeft,
   ArrowRight,
-  BookOpen,
   CheckCircle2,
-  ChevronRight,
   Circle,
-  Clock,
+  ChevronRight,
   Copy,
   Check,
   Info,
   AlertTriangle,
   Lightbulb,
   Loader2,
+  BookOpen,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-// ─── Markdown-like renderer ───
-// Parses the content string and renders styled blocks.
-// Supports: ## h2, ### h3, paragraphs, **bold**, *italic*, - bullet lists,
-// 1. numbered lists, ```code blocks```, > blockquotes, :::info/warning/tip callouts
-function ContentRenderer({
-  content,
-  onHeadingsExtracted,
-}: {
-  content: string;
-  onHeadingsExtracted: (
-    headings: { id: string; text: string; level: number }[]
-  ) => void;
-}) {
-  const headingsRef = useRef<{ id: string; text: string; level: number }[]>([]);
+// ─── Markdown renderer ───
+function MarkdownRenderer({ content }: { content: string }) {
+  const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
 
-  const blocks = useMemo(() => {
-    const lines = content.split("\n");
-    const result: React.ReactNode[] = [];
-    const extractedHeadings: { id: string; text: string; level: number }[] = [];
-    let i = 0;
+  const copyCode = (code: string, idx: number) => {
+    navigator.clipboard.writeText(code);
+    setCopiedIdx(idx);
+    setTimeout(() => setCopiedIdx(null), 2000);
+  };
 
-    const formatInline = (text: string): React.ReactNode => {
-      // Bold + italic
-      const parts: React.ReactNode[] = [];
-      const regex = /(\*\*\*(.+?)\*\*\*|\*\*(.+?)\*\*|\*(.+?)\*|`(.+?)`)/g;
-      let lastIndex = 0;
-      let match;
+  const blocks = useMemo(() => parseMarkdown(content), [content]);
 
-      while ((match = regex.exec(text)) !== null) {
-        if (match.index > lastIndex) {
-          parts.push(text.slice(lastIndex, match.index));
+  return (
+    <article className="prose-none max-w-none">
+      {blocks.map((block, i) => {
+        switch (block.type) {
+          case "h2":
+            return (
+              <h2
+                key={i}
+                id={slugify(block.text)}
+                className="font-display text-2xl md:text-3xl font-semibold mt-16 mb-6 scroll-mt-32 tracking-tight text-foreground border-b border-border/50 pb-2"
+              >
+                {block.text}
+              </h2>
+            );
+          case "h3":
+            return (
+              <h3
+                key={i}
+                id={slugify(block.text)}
+                className="font-display text-xl font-medium mt-10 mb-4 scroll-mt-32 tracking-tight text-foreground/90"
+              >
+                {block.text}
+              </h3>
+            );
+          case "paragraph":
+            return (
+              <p
+                key={i}
+                className="text-lg leading-relaxed text-muted-foreground mb-6"
+                dangerouslySetInnerHTML={{ __html: inlineFormat(block.text) }}
+              />
+            );
+          case "ul":
+            return (
+              <ul key={i} className="list-disc pl-6 mb-8 space-y-2 marker:text-muted-foreground/60 text-lg text-muted-foreground leading-relaxed">
+                {block.items!.map((item, j) => (
+                  <li
+                    key={j}
+                    className="pl-2"
+                    dangerouslySetInnerHTML={{ __html: inlineFormat(item) }}
+                  />
+                ))}
+              </ul>
+            );
+          case "ol":
+            return (
+              <ol key={i} className="list-decimal pl-6 mb-8 space-y-2 marker:text-muted-foreground/80 marker:font-medium text-lg text-muted-foreground leading-relaxed">
+                {block.items!.map((item, j) => (
+                  <li
+                    key={j}
+                    className="pl-2"
+                    dangerouslySetInnerHTML={{ __html: inlineFormat(item) }}
+                  />
+                ))}
+              </ol>
+            );
+          case "code":
+            return (
+              <div
+                key={i}
+                className="relative group rounded-xl overflow-hidden mb-8 border border-border/40 shadow-sm transition-all duration-300 hover:shadow-md"
+              >
+                {block.lang && (
+                  <div className="bg-muted/80 backdrop-blur-md text-muted-foreground text-[0.7rem] uppercase tracking-wider px-4 py-2 font-mono border-b border-border/50 flex items-center justify-between">
+                    <span>{block.lang}</span>
+                  </div>
+                )}
+                <pre className="bg-zinc-950 dark:bg-zinc-950 text-zinc-50 p-5 overflow-x-auto font-mono text-sm leading-relaxed">
+                  <code>{block.text}</code>
+                </pre>
+                <button
+                  onClick={() => copyCode(block.text, i)}
+                  className="absolute top-2 right-2 p-2 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-zinc-100 opacity-0 group-hover:opacity-100 transition-all focus:opacity-100"
+                  aria-label="Copy code"
+                >
+                  {copiedIdx === i ? (
+                    <Check className="w-4 h-4" />
+                  ) : (
+                    <Copy className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+            );
+          case "blockquote":
+            return (
+              <blockquote
+                key={i}
+                className="border-l-4 border-primary pl-6 py-2 my-8 font-serif text-xl italic text-foreground/80 bg-muted/20 rounded-r-xl"
+                dangerouslySetInnerHTML={{ __html: inlineFormat(block.text) }}
+              />
+            );
+          case "callout": {
+            const variant = block.variant || "info";
+            let icon = <Info className="w-5 h-5" />;
+            let alertVariant: "default" | "destructive" = "default";
+            let title = "Info";
+
+            if (variant === "warning") {
+              icon = <AlertTriangle className="w-5 h-5 text-amber-500" />;
+              title = "Warning";
+            } else if (variant === "tip") {
+              icon = <Lightbulb className="w-5 h-5 text-emerald-500" />;
+              title = "Tip";
+            } else {
+              icon = <Info className="w-5 h-5 text-blue-500" />;
+              title = "Note";
+            }
+
+            return (
+              <Alert variant={alertVariant} className="mb-8 mt-4 bg-muted/30 border-border/50 shadow-sm" key={i}>
+                {icon}
+                <AlertTitle className="tracking-tight text-foreground">{title}</AlertTitle>
+                <AlertDescription className="text-muted-foreground text-base mt-1.5 leading-relaxed">
+                  <span dangerouslySetInnerHTML={{ __html: inlineFormat(block.text) }} />
+                </AlertDescription>
+              </Alert>
+            );
+          }
+          default:
+            return null;
         }
-        if (match[2]) {
-          parts.push(
-            <strong key={match.index} className="italic">
-              {match[2]}
-            </strong>
-          );
-        } else if (match[3]) {
-          parts.push(<strong key={match.index}>{match[3]}</strong>);
-        } else if (match[4]) {
-          parts.push(<em key={match.index}>{match[4]}</em>);
-        } else if (match[5]) {
-          parts.push(
-            <code
-              key={match.index}
-              className="rounded bg-muted px-1.5 py-0.5 font-mono text-sm"
-            >
-              {match[5]}
-            </code>
-          );
-        }
-        lastIndex = match.index + match[0].length;
-      }
-      if (lastIndex < text.length) {
-        parts.push(text.slice(lastIndex));
-      }
-      return parts.length > 0 ? parts : text;
-    };
+      })}
+    </article>
+  );
+}
 
-    while (i < lines.length) {
-      const line = lines[i];
+// ─── Markdown parsing helpers ───
+type Block = {
+  type:
+    | "h2"
+    | "h3"
+    | "paragraph"
+    | "ul"
+    | "ol"
+    | "code"
+    | "blockquote"
+    | "callout";
+  text: string;
+  items?: string[];
+  lang?: string;
+  variant?: string;
+};
 
-      // Code block
-      if (line.trimStart().startsWith("```")) {
-        const lang = line.trim().replace("```", "");
-        const codeLines: string[] = [];
-        i++;
-        while (i < lines.length && !lines[i].trimStart().startsWith("```")) {
-          codeLines.push(lines[i]);
-          i++;
-        }
-        i++; // skip closing ```
-        result.push(
-          <CodeBlock
-            key={`code-${i}`}
-            code={codeLines.join("\n")}
-            lang={lang}
-          />
-        );
-        continue;
-      }
+function parseMarkdown(md: string): Block[] {
+  const lines = md.split("\n");
+  const blocks: Block[] = [];
+  let i = 0;
 
-      // Callout blocks :::info, :::warning, :::tip
-      if (line.trimStart().startsWith(":::")) {
-        const variant = line.trim().replace(":::", "").trim() as
-          "info" | "warning" | "tip";
-        const calloutLines: string[] = [];
-        i++;
-        while (i < lines.length && !lines[i].trimStart().startsWith(":::")) {
-          calloutLines.push(lines[i]);
-          i++;
-        }
-        i++; // skip closing :::
-        result.push(
-          <Callout key={`callout-${i}`} variant={variant}>
-            {calloutLines.map((l, idx) => (
-              <p key={idx}>{formatInline(l)}</p>
-            ))}
-          </Callout>
-        );
-        continue;
-      }
+  while (i < lines.length) {
+    const line = lines[i];
 
-      // Blockquote
-      if (line.trimStart().startsWith("> ")) {
-        const quoteLines: string[] = [];
-        while (i < lines.length && lines[i].trimStart().startsWith("> ")) {
-          quoteLines.push(lines[i].replace(/^>\s?/, ""));
-          i++;
-        }
-        result.push(
-          <blockquote
-            key={`bq-${i}`}
-            className="my-4 border-l-4 border-primary/40 pl-4 text-muted-foreground italic"
-          >
-            {quoteLines.map((l, idx) => (
-              <p key={idx}>{formatInline(l)}</p>
-            ))}
-          </blockquote>
-        );
-        continue;
-      }
-
-      // h2
-      if (line.startsWith("## ")) {
-        const text = line.replace("## ", "");
-        const id = text
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/(^-|-$)/g, "");
-        extractedHeadings.push({ id, text, level: 2 });
-        result.push(
-          <h2
-            key={`h2-${i}`}
-            id={id}
-            className="mt-10 mb-4 scroll-mt-24 font-display text-2xl font-bold"
-          >
-            {text}
-          </h2>
-        );
-        i++;
-        continue;
-      }
-
-      // h3
-      if (line.startsWith("### ")) {
-        const text = line.replace("### ", "");
-        const id = text
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/(^-|-$)/g, "");
-        extractedHeadings.push({ id, text, level: 3 });
-        result.push(
-          <h3
-            key={`h3-${i}`}
-            id={id}
-            className="mt-8 mb-3 scroll-mt-24 font-display text-xl font-semibold"
-          >
-            {text}
-          </h3>
-        );
-        i++;
-        continue;
-      }
-
-      // Unordered list
-      if (line.trimStart().startsWith("- ")) {
-        const listItems: string[] = [];
-        while (i < lines.length && lines[i].trimStart().startsWith("- ")) {
-          listItems.push(lines[i].replace(/^-\s+/, ""));
-          i++;
-        }
-        result.push(
-          <ul
-            key={`ul-${i}`}
-            className="my-4 ml-6 list-disc space-y-2 text-foreground/90"
-          >
-            {listItems.map((item, idx) => (
-              <li key={idx}>{formatInline(item)}</li>
-            ))}
-          </ul>
-        );
-        continue;
-      }
-
-      // Ordered list
-      if (/^\d+\.\s/.test(line.trimStart())) {
-        const listItems: string[] = [];
-        while (i < lines.length && /^\d+\.\s/.test(lines[i].trimStart())) {
-          listItems.push(lines[i].replace(/^\d+\.\s+/, ""));
-          i++;
-        }
-        result.push(
-          <ol
-            key={`ol-${i}`}
-            className="my-4 ml-6 list-decimal space-y-2 text-foreground/90"
-          >
-            {listItems.map((item, idx) => (
-              <li key={idx}>{formatInline(item)}</li>
-            ))}
-          </ol>
-        );
-        continue;
-      }
-
-      // Empty line
-      if (line.trim() === "") {
-        i++;
-        continue;
-      }
-
-      // Paragraph
-      result.push(
-        <p key={`p-${i}`} className="my-4 leading-7 text-foreground/90">
-          {formatInline(line)}
-        </p>
-      );
+    if (line.startsWith("```")) {
+      const lang = line.slice(3).trim();
+      const codeLines: string[] = [];
       i++;
+      while (i < lines.length && !lines[i].startsWith("```")) {
+        codeLines.push(lines[i]);
+        i++;
+      }
+      blocks.push({ type: "code", text: codeLines.join("\n"), lang });
+      i++;
+      continue;
     }
 
-    // Store headings for TOC
-    headingsRef.current = extractedHeadings;
-    return result;
-  }, [content]);
+    const calloutMatch = line.match(/^>\s*\[!(info|warning|tip)\]\s*(.*)/i);
+    if (calloutMatch) {
+      const variant = calloutMatch[1].toLowerCase();
+      const calloutLines: string[] = [];
+      if (calloutMatch[2]) calloutLines.push(calloutMatch[2]);
+      i++;
+      while (i < lines.length && lines[i].startsWith("> ")) {
+        calloutLines.push(lines[i].slice(2));
+        i++;
+      }
+      blocks.push({
+        type: "callout",
+        text: calloutLines.join(" "),
+        variant,
+      });
+      continue;
+    }
 
-  useEffect(() => {
-    onHeadingsExtracted(headingsRef.current);
-  }, [blocks, onHeadingsExtracted]);
+    if (line.startsWith("> ")) {
+      const quoteLines: string[] = [];
+      while (i < lines.length && lines[i].startsWith("> ")) {
+        quoteLines.push(lines[i].slice(2));
+        i++;
+      }
+      blocks.push({ type: "blockquote", text: quoteLines.join(" ") });
+      continue;
+    }
 
-  return <div className="prose-custom">{blocks}</div>;
+    if (line.startsWith("## ")) {
+      blocks.push({ type: "h2", text: line.slice(3).trim() });
+      i++;
+      continue;
+    }
+
+    if (line.startsWith("### ")) {
+      blocks.push({ type: "h3", text: line.slice(4).trim() });
+      i++;
+      continue;
+    }
+
+    if (line.match(/^[-*] /)) {
+      const items: string[] = [];
+      while (i < lines.length && lines[i].match(/^[-*] /)) {
+        items.push(lines[i].replace(/^[-*] /, ""));
+        i++;
+      }
+      blocks.push({ type: "ul", text: "", items });
+      continue;
+    }
+
+    if (line.match(/^\d+\. /)) {
+      const items: string[] = [];
+      while (i < lines.length && lines[i].match(/^\d+\. /)) {
+        items.push(lines[i].replace(/^\d+\.\s*/, ""));
+        i++;
+      }
+      blocks.push({ type: "ol", text: "", items });
+      continue;
+    }
+
+    if (line.trim() === "") {
+      i++;
+      continue;
+    }
+
+    const paraLines: string[] = [];
+    while (
+      i < lines.length &&
+      lines[i].trim() !== "" &&
+      !lines[i].startsWith("#") &&
+      !lines[i].startsWith("```") &&
+      !lines[i].startsWith("> ") &&
+      !lines[i].match(/^[-*] /) &&
+      !lines[i].match(/^\d+\. /)
+    ) {
+      paraLines.push(lines[i]);
+      i++;
+    }
+    if (paraLines.length > 0) {
+      blocks.push({ type: "paragraph", text: paraLines.join(" ") });
+    }
+  }
+
+  return blocks;
 }
 
-// ─── Code block with copy button ───
-function CodeBlock({ code, lang }: { code: string; lang: string }) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  return (
-    <div className="group relative my-6 overflow-hidden rounded-xl border border-border bg-zinc-950 text-zinc-100">
-      {lang && (
-        <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-2 text-xs text-zinc-400">
-          <span className="font-mono">{lang}</span>
-          <button
-            onClick={handleCopy}
-            className="flex items-center gap-1 rounded px-2 py-1 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-200"
-          >
-            {copied ? (
-              <Check className="h-3.5 w-3.5" />
-            ) : (
-              <Copy className="h-3.5 w-3.5" />
-            )}
-            {copied ? "Copied" : "Copy"}
-          </button>
-        </div>
-      )}
-      <pre className="overflow-x-auto p-4 text-sm leading-relaxed">
-        <code>{code}</code>
-      </pre>
-    </div>
-  );
+function inlineFormat(text: string): string {
+  return text
+    .replace(/`([^`]+)`/g, '<code class="px-1.5 py-0.5 rounded-md bg-muted/80 text-foreground font-mono text-[0.85em] border border-border/50">$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, "<strong class='font-semibold text-foreground'>$1</strong>")
+    .replace(/\*([^*]+)\*/g, "<em class='text-foreground/90'>$1</em>");
 }
 
-// ─── Callout component ───
-function Callout({
-  variant,
-  children,
-}: {
-  variant: "info" | "warning" | "tip";
-  children: React.ReactNode;
-}) {
-  const config = {
-    info: {
-      icon: Info,
-      bg: "bg-blue-500/10",
-      border: "border-blue-500/30",
-      iconColor: "text-blue-500",
-      title: "Info",
-    },
-    warning: {
-      icon: AlertTriangle,
-      bg: "bg-amber-500/10",
-      border: "border-amber-500/30",
-      iconColor: "text-amber-500",
-      title: "Warning",
-    },
-    tip: {
-      icon: Lightbulb,
-      bg: "bg-emerald-500/10",
-      border: "border-emerald-500/30",
-      iconColor: "text-emerald-500",
-      title: "Tip",
-    },
-  };
-
-  const c = config[variant] || config.info;
-  const Icon = c.icon;
-
-  return (
-    <div className={`my-6 rounded-xl border p-4 ${c.bg} ${c.border}`}>
-      <div className="mb-2 flex items-center gap-2 font-semibold">
-        <Icon className={`h-4 w-4 ${c.iconColor}`} />
-        <span className={c.iconColor}>{c.title}</span>
-      </div>
-      <div className="text-sm text-foreground/80 [&>p]:my-1">{children}</div>
-    </div>
-  );
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-");
 }
 
 // ─── Table of Contents ───
 function TableOfContents({
   headings,
   activeId,
-  readProgress,
 }: {
   headings: { id: string; text: string; level: number }[];
   activeId: string;
-  readProgress: number;
 }) {
-  if (headings.length === 0) return null;
-
   return (
-    <div className="space-y-4">
-      <h4 className="text-sm font-semibold text-foreground">On this page</h4>
-      <div className="relative">
-        {/* Reading progress bar */}
-        <div className="absolute top-0 left-0 h-full w-0.5 rounded-full bg-border">
-          <div
-            className="w-full rounded-full bg-primary transition-all duration-200"
-            style={{ height: `${readProgress}%` }}
-          />
-        </div>
-        <nav className="space-y-1 pl-4">
-          {headings.map((h) => (
-            <a
-              key={h.id}
-              href={`#${h.id}`}
-              className={`block py-1 text-sm transition-colors ${
-                h.level === 3 ? "pl-3" : ""
-              } ${
-                activeId === h.id
-                  ? "ml-[-17px] border-l-2 border-primary pl-[calc(1rem+15px)] font-medium text-primary"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {h.text}
-            </a>
-          ))}
-        </nav>
+    <nav className="relative space-y-1" aria-label="Table of contents">
+      <div className="flex items-center gap-2 mb-4">
+        <BookOpen className="w-4 h-4 text-primary" />
+        <p className="text-xs font-bold uppercase tracking-widest text-foreground">
+          Contents
+        </p>
       </div>
-    </div>
+      <div className="relative border-l border-border/40 ml-2 pl-4 py-1 flex flex-col gap-2.5">
+        {headings.map((h) => (
+          <a
+            key={h.id}
+            href={`#${h.id}`}
+            className={cn(
+              "block text-sm transition-all duration-200 relative",
+              h.level === 3 ? "pl-3 text-muted-foreground/80" : "font-medium",
+              activeId === h.id
+                ? "text-primary"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {activeId === h.id && (
+              <span className="absolute -left-[17px] top-1/2 -translate-y-1/2 w-[2px] h-4 bg-primary rounded-r-full" />
+            )}
+            {h.text}
+          </a>
+        ))}
+      </div>
+    </nav>
   );
 }
-
-// ─── Mock content for when content is null ───
-const MOCK_CONTENT = `## Introduction
-
-This topic covers the fundamental concepts you need to understand before moving forward. Let's dive into the key areas that will build your foundation.
-
-> Knowledge is power. Understanding these fundamentals will make everything that follows much clearer.
-
-### Key Concepts
-
-Here are the main ideas we'll explore in this section:
-
-- **Core principles** that govern the entire domain
-- *Historical context* and why it matters today
-- Practical applications in real-world scenarios
-- Common misconceptions to avoid
-
-### Getting Started
-
-Follow these steps to set up your environment:
-
-1. Install the required tools and dependencies
-2. Configure your workspace settings
-3. Run the initial setup script
-4. Verify everything works correctly
-
-\`\`\`python
-# Example setup script
-def initialize_project():
-    config = load_config("settings.yaml")
-    validate_environment(config)
-    print("Setup complete!")
-
-initialize_project()
-\`\`\`
-
-:::info
-Make sure you have Python 3.9 or higher installed before running this script.
-:::
-
-## Deep Dive
-
-Now that you have the basics, let's explore the more advanced aspects of this topic.
-
-### Architecture Overview
-
-The system is built on three main pillars:
-
-1. **Data Layer** — responsible for persistence and retrieval
-2. **Logic Layer** — handles business rules and transformations
-3. **Presentation Layer** — manages the user interface
-
-### Best Practices
-
-- Always validate input before processing
-- Use meaningful variable names
-- Write tests for critical paths
-- Document your decisions
-
-:::warning
-Avoid premature optimization. Focus on correctness first, then measure and optimize where needed.
-:::
-
-\`\`\`javascript
-// Example of input validation
-function processData(input) {
-  if (!input || typeof input !== 'object') {
-    throw new Error('Invalid input: expected an object');
-  }
-
-  const { name, value } = input;
-  return { name: name.trim(), value: Number(value) };
-}
-\`\`\`
-
-### Common Patterns
-
-Understanding these patterns will help you write better code:
-
-- **Observer Pattern** — for event-driven architectures
-- **Factory Pattern** — for creating objects without specifying exact classes
-- **Strategy Pattern** — for interchangeable algorithms
-
-:::tip
-When in doubt, start with the simplest pattern that solves your problem. You can always refactor later.
-:::
-
-## Summary
-
-In this topic, we covered the essential building blocks. In the next section, we'll apply these concepts to build a real project.
-
-> The best way to learn is by doing. Take the time to experiment with the code examples above before moving on.`;
 
 // ─── Main Component ───
 export default function CourseTopic() {
   const { id, topicId } = useParams<{ id: string; topicId: string }>();
-  const navigate = useNavigate();
-
   const {
     data: topic,
     isLoading,
     isError,
     refetch,
   } = useGetCourseTopic(id || "", topicId || "");
-
-  const { updateTopicCompletion, isPending: isToggling } =
+  const { updateTopicCompletion, isPending: isTogglingCompletion } =
     useUpdateTopicCompletion(id || "", topicId || "");
 
-  const [headings, setHeadings] = useState<
-    { id: string; text: string; level: number }[]
-  >([]);
-  const [activeHeading, setActiveHeading] = useState("");
-  const [readProgress, setReadProgress] = useState(0);
+  const [activeHeadingId, setActiveHeadingId] = useState("");
   const contentRef = useRef<HTMLDivElement>(null);
+  const [readProgress, setReadProgress] = useState(0);
 
-  // Scroll spy for active heading and reading progress
+  const headings = useMemo(() => {
+    if (!topic?.content) return [];
+    const matches = topic.content.matchAll(/^(#{2,3})\s+(.+)$/gm);
+    return Array.from(matches).map((m) => ({
+      id: slugify(m[2]),
+      text: m[2],
+      level: m[1].length,
+    }));
+  }, [topic?.content]);
+
+  useEffect(() => {
+    if (headings.length === 0) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActiveHeadingId(entry.target.id);
+          }
+        }
+      },
+      { rootMargin: "-15% 0% -75% 0%" }
+    );
+    headings.forEach((h) => {
+      const el = document.getElementById(h.id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, [headings]);
+
   useEffect(() => {
     const handleScroll = () => {
-      // Reading progress
       const scrollTop = window.scrollY;
       const docHeight =
         document.documentElement.scrollHeight - window.innerHeight;
       if (docHeight > 0) {
         setReadProgress(Math.min((scrollTop / docHeight) * 100, 100));
       }
-
-      // Active heading
-      const headingEls = headings.map((h) => document.getElementById(h.id));
-      let current = "";
-      for (const el of headingEls) {
-        if (el && el.getBoundingClientRect().top <= 100) {
-          current = el.id;
-        }
-      }
-      setActiveHeading(current);
     };
-
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [headings]);
+  }, []);
 
-  if (isLoading) {
-    return <TopicSkeleton />;
-  }
+  if (isLoading) return <TopicSkeleton />;
 
   if (isError || !topic) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 text-center">
-        <p className="mb-4 text-muted-foreground">Failed to load topic.</p>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <p className="text-muted-foreground mb-4">
+          Failed to load topic content.
+        </p>
         <Button variant="outline" onClick={() => refetch()}>
           Try again
         </Button>
@@ -536,214 +412,208 @@ export default function CourseTopic() {
     );
   }
 
-  const contentToRender = topic.content || MOCK_CONTENT;
-  const estimatedReadTime = Math.max(
-    1,
-    Math.round(contentToRender.split(/\s+/).length / 200)
-  );
-
   return (
-    <div className="-m-6">
-      {/* Top Navigation Bar */}
-      <div className="sticky top-0 z-20 border-b border-border bg-background/80 backdrop-blur-md">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
-          {/* Breadcrumb */}
-          <div className="flex items-center gap-1.5 overflow-hidden text-sm text-muted-foreground">
+    <div className="min-h-screen pb-24">
+      {/* Top navigation bar */}
+      <header className="sticky top-0 z-30 bg-background/90 backdrop-blur-xl border-b border-border/40 shadow-sm transition-all duration-300">
+        {/* Sleek top progress bar */}
+        <div 
+          className="absolute top-0 left-0 h-[2px] bg-primary transition-all duration-150 ease-out z-40"
+          style={{ width: `${readProgress}%` }}
+        />
+        
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground overflow-hidden">
             <Link
               to="/courses"
-              className="shrink-0 transition-colors hover:text-foreground"
+              className="hover:text-foreground transition-colors shrink-0 flex items-center gap-1.5"
             >
               Dashboard
             </Link>
-            <ChevronRight className="h-3.5 w-3.5 shrink-0" />
+            <ChevronRight className="w-4 h-4 shrink-0 text-border" />
             <Link
               to={`/courses/${id}`}
-              className="shrink-0 transition-colors hover:text-foreground"
+              className="hover:text-foreground transition-colors truncate max-w-[120px] sm:max-w-[200px]"
             >
               Course
             </Link>
-            <ChevronRight className="h-3.5 w-3.5 shrink-0" />
-            <span className="truncate font-medium text-foreground">
+            <ChevronRight className="w-4 h-4 shrink-0 text-border" />
+            <span className="text-foreground truncate max-w-[150px] sm:max-w-[250px]">
               {topic.title}
             </span>
           </div>
 
-          {/* Nav buttons */}
-          <div className="flex items-center gap-2">
-            {topic.prev && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate(`/courses/${id}/topics/${topic.prev}`)}
+          <div className="flex items-center gap-3">
+            <Badge variant="secondary" className="hidden md:flex bg-muted text-muted-foreground border-transparent font-medium shadow-none">
+              Part {topic.order}
+            </Badge>
+            <div className="flex items-center gap-1 bg-muted/50 rounded-full p-1 border border-border/50">
+              <Link
+                to={topic.previousTopic ? `/courses/${id}/topics/${topic.previousTopic.id}` : "#"}
+                className={cn(!topic.previousTopic && "pointer-events-none opacity-50")}
               >
-                <ArrowLeft className="mr-1 h-4 w-4" />
-                <span className="hidden sm:inline">Previous</span>
-              </Button>
-            )}
-            <span className="hidden px-2 text-xs text-muted-foreground sm:inline">
-              Topic {topic.order}
-            </span>
-            {topic.next && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate(`/courses/${id}/topics/${topic.next}`)}
+                <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full hover:bg-background shadow-sm">
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span className="sr-only">Previous topic</span>
+                </Button>
+              </Link>
+              <Link
+                to={topic.nextTopic ? `/courses/${id}/topics/${topic.nextTopic.id}` : "#"}
+                className={cn(!topic.nextTopic && "pointer-events-none opacity-50")}
               >
-                <span className="hidden sm:inline">Next</span>
-                <ArrowRight className="ml-1 h-4 w-4" />
-              </Button>
-            )}
+                <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full hover:bg-background shadow-sm">
+                  <ArrowRight className="w-3.5 h-3.5" />
+                  <span className="sr-only">Next topic</span>
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Content area with optional TOC sidebar */}
-      <div className="mx-auto max-w-6xl px-6 py-10">
-        <div className="flex gap-12">
-          {/* Main reader */}
-          <article className="max-w-3xl min-w-0 flex-1" ref={contentRef}>
-            {/* Topic header */}
-            <div className="mb-8 space-y-4">
-              <h1 className="font-display text-3xl font-bold tracking-tight">
-                {topic.title}
-              </h1>
-              <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1.5">
-                  <BookOpen className="h-4 w-4" />
-                  Module topic
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Clock className="h-4 w-4" />
-                  {estimatedReadTime} min read
-                </span>
-                {topic.isCompleted ? (
-                  <Badge
-                    variant="secondary"
-                    className="border-none bg-emerald-500/10 text-emerald-500"
-                  >
-                    <CheckCircle2 className="mr-1 h-3.5 w-3.5" />
-                    Completed
-                  </Badge>
-                ) : (
-                  <Badge variant="outline" className="text-muted-foreground">
-                    <Circle className="mr-1 h-3.5 w-3.5" />
-                    In progress
-                  </Badge>
-                )}
-              </div>
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-12 md:py-20 flex gap-12 lg:gap-24">
+        {/* Central Content */}
+        <div className="flex-1 max-w-3xl min-w-0" ref={contentRef}>
+          {/* Header Section */}
+          <header className="mb-12">
+            <h1 className="font-display text-4xl md:text-5xl font-bold tracking-tight text-foreground mb-6 leading-[1.15]">
+              {topic.title}
+            </h1>
+            
+            <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-muted-foreground/80">
+              <span className="flex items-center gap-2">
+                <BookOpen className="w-4 h-4" />
+                ~{Math.max(1, Math.ceil((topic.content?.length || 0) / 1200))} min read
+              </span>
+              <span className="w-1 h-1 rounded-full bg-border" />
+              {topic.isCompleted ? (
+                <Badge
+                  variant="secondary"
+                  className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-none shadow-none gap-1.5 px-2.5 py-0.5"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  Completed
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="text-muted-foreground/80 border-border/60 gap-1.5 px-2.5 py-0.5 shadow-none bg-muted/20">
+                  <Circle className="w-3.5 h-3.5" />
+                  In progress
+                </Badge>
+              )}
             </div>
+          </header>
 
-            <Separator className="mb-8" />
+          <Separator className="mb-12 bg-border/40" />
 
-            {/* Rendered content */}
-            <ContentRenderer
-              content={contentToRender}
-              onHeadingsExtracted={setHeadings}
-            />
+          {/* Body Content */}
+          <div className="mb-20">
+            {topic.content ? (
+              <MarkdownRenderer content={topic.content} />
+            ) : (
+              <p className="text-muted-foreground text-lg italic bg-muted/30 p-8 rounded-xl border border-border/50 text-center">
+                This topic doesn't have any content yet.
+              </p>
+            )}
+          </div>
 
-            <Separator className="mt-12 mb-8" />
+          <Separator className="mb-12 bg-border/40" />
 
-            {/* Bottom action bar */}
-            <div className="flex flex-col items-center justify-between gap-4 pb-10 sm:flex-row">
-              <div>
-                {topic.prev ? (
-                  <Button
-                    variant="ghost"
-                    onClick={() =>
-                      navigate(`/courses/${id}/topics/${topic.prev}`)
-                    }
-                  >
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Previous topic
-                  </Button>
-                ) : (
-                  <Button variant="ghost">
-                    <Link to={`/courses/${id}`}>
-                      <ArrowLeft className="mr-2 h-4 w-4" />
-                      Back to course
-                    </Link>
-                  </Button>
-                )}
-              </div>
-
-              <Button
-                variant={topic.isCompleted ? "outline" : "default"}
-                onClick={() => updateTopicCompletion()}
-                disabled={isToggling}
+          {/* Footer Navigation */}
+          <nav className="grid sm:grid-cols-2 gap-4">
+            {topic.previousTopic ? (
+              <Link
+                to={`/courses/${id}/topics/${topic.previousTopic.id}`}
+                className="group flex flex-col items-start gap-2 p-6 rounded-2xl border border-border/50 bg-muted/20 hover:bg-muted/50 transition-all duration-300"
               >
-                {isToggling ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : topic.isCompleted ? (
-                  <Circle className="mr-2 h-4 w-4" />
-                ) : (
-                  <CheckCircle2 className="mr-2 h-4 w-4" />
-                )}
-                {topic.isCompleted ? "Mark incomplete" : "Mark complete"}
-              </Button>
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                  <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1" />
+                  Previous Topic
+                </span>
+                <span className="font-medium text-foreground line-clamp-2">
+                  {topic.previousTopic.title}
+                </span>
+              </Link>
+            ) : (
+              <div /> // Empty placeholder for grid
+            )}
 
-              <div>
-                {topic.next ? (
-                  <Button
-                    onClick={() =>
-                      navigate(`/courses/${id}/topics/${topic.next}`)
-                    }
-                  >
-                    Next topic
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                ) : (
-                  <Button>
-                    <Link to={`/courses/${id}`}>
-                      Finish course
-                      <CheckCircle2 className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
-                )}
-              </div>
-            </div>
-          </article>
+            {topic.nextTopic ? (
+              <Link
+                to={`/courses/${id}/topics/${topic.nextTopic.id}`}
+                className="group flex flex-col items-end text-right gap-2 p-6 rounded-2xl border border-border/50 bg-primary/[0.03] hover:bg-primary/[0.08] transition-all duration-300"
+              >
+                <span className="text-xs font-bold uppercase tracking-wider text-primary/80 flex items-center gap-1.5">
+                  Next Topic
+                  <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+                </span>
+                <span className="font-medium text-foreground line-clamp-2">
+                  {topic.nextTopic.title}
+                </span>
+              </Link>
+            ) : (
+              <div />
+            )}
+          </nav>
+          
+          <div className="mt-8 flex justify-center">
+            <Button
+              size="lg"
+              variant={topic.isCompleted ? "outline" : "default"}
+              onClick={() => updateTopicCompletion()}
+              disabled={isTogglingCompletion}
+              className={cn(
+                "w-full sm:w-auto rounded-full font-medium px-8 transition-all shadow-sm",
+                !topic.isCompleted && "hover:shadow-md hover:-translate-y-0.5"
+              )}
+            >
+              {isTogglingCompletion ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : topic.isCompleted ? (
+                <Circle className="mr-2 h-4 w-4" />
+              ) : (
+                <CheckCircle2 className="mr-2 h-4 w-4" />
+              )}
+              {topic.isCompleted ? "Mark as Incomplete" : "Mark as Completed"}
+            </Button>
+          </div>
+        </div>
 
-          {/* Right sidebar — TOC */}
-          <aside className="hidden w-56 shrink-0 lg:block">
-            <div className="sticky top-20">
-              <TableOfContents
-                headings={headings}
-                activeId={activeHeading}
-                readProgress={readProgress}
-              />
+        {/* Right Sidebar */}
+        {headings.length > 0 && (
+          <aside className="hidden lg:block w-64 shrink-0">
+            <div className="sticky top-28">
+              <TableOfContents headings={headings} activeId={activeHeadingId} />
             </div>
           </aside>
-        </div>
-      </div>
+        )}
+      </main>
     </div>
   );
 }
 
-// ─── Loading skeleton ───
 function TopicSkeleton() {
   return (
-    <div className="-m-6">
-      <div className="flex h-14 items-center border-b border-border px-6">
-        <Skeleton className="h-4 w-48" />
-      </div>
-      <div className="mx-auto max-w-3xl space-y-6 px-6 py-10">
-        <Skeleton className="h-10 w-3/4" />
-        <div className="flex gap-3">
-          <Skeleton className="h-5 w-24" />
-          <Skeleton className="h-5 w-20" />
-          <Skeleton className="h-5 w-28" />
+    <div className="min-h-screen">
+      <header className="border-b border-border/50 bg-background/50">
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+          <Skeleton className="h-5 w-64 rounded-full" />
+          <Skeleton className="h-8 w-24 rounded-full" />
         </div>
-        <Separator />
-        <div className="space-y-4">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-3/4" />
-          <Skeleton className="mt-6 h-8 w-1/2" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-5/6" />
-          <Skeleton className="h-32 w-full rounded-xl" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-2/3" />
+      </header>
+      <div className="max-w-6xl mx-auto px-6 py-20 flex gap-16">
+        <div className="flex-1 max-w-3xl space-y-8">
+          <Skeleton className="h-12 w-3/4 rounded-lg" />
+          <div className="flex gap-4">
+            <Skeleton className="h-6 w-24 rounded-full" />
+            <Skeleton className="h-6 w-28 rounded-full" />
+          </div>
+          <Separator className="bg-border/50" />
+          <div className="space-y-4">
+            <Skeleton className="h-5 w-full rounded" />
+            <Skeleton className="h-5 w-full rounded" />
+            <Skeleton className="h-5 w-5/6 rounded" />
+          </div>
+          <Skeleton className="h-40 w-full rounded-2xl mt-12" />
         </div>
       </div>
     </div>

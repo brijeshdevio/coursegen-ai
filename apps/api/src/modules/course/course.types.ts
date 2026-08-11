@@ -60,10 +60,20 @@ export type CourseTopicResponse = {
   id: string;
   title: string;
   order: number;
-  content: string | null;
   isCompleted: boolean;
   createdAt: Date;
   updatedAt: Date;
+  content: string;
+  previousTopic: {
+    id: string;
+    title: string;
+    order: number;
+  } | null;
+  nextTopic: {
+    id: string;
+    title: string;
+    order: number;
+  } | null;
 };
 
 export type ToggleTopicCompletionResponse = {
