@@ -1,0 +1,38 @@
+.font-poppins {
+  font-family: "Poppins", sans-serif;
+  font-style: normal;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.font-lora,
+body {
+  font-family: "Lora", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.font-inter,
+button,
+a {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.font-space-mono,
+code {
+  font-family: "Space Mono", monospace;
+  font-weight: 400;
+  font-style: normal;
+}

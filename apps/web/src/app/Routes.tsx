@@ -5,8 +5,9 @@ import {
   Route,
 } from "react-router-dom";
 
-import { ProtectedLayout } from "@/components/layout/ProtectedLayout";
 import { AuthLayout } from "@/components/layout/AuthLayout";
+import { CourseLayout } from "@/components/layout/CourseLayout";
+import { UserLayout } from "@/components/layout/UserLayout";
 
 const Home = lazy(() => import("@/pages/public/Home"));
 const Signup = lazy(() => import("@/pages/auth/Signup"));
@@ -15,6 +16,7 @@ const Courses = lazy(() => import("@/pages/course/Courses"));
 const CourseDetails = lazy(() => import("@/pages/course/CourseDetails"));
 const CourseTopic = lazy(() => import("@/pages/course/CourseTopic"));
 const CourseGenerate = lazy(() => import("@/pages/course/CourseGenerate"));
+const Profile = lazy(() => import("@/pages/user/Profile"));
 
 export default function Routes() {
   return (
@@ -25,11 +27,14 @@ export default function Routes() {
           <Route path="signup" element={<Signup />} />
           <Route path="login" element={<Login />} />
         </Route>
-        <Route path="courses" element={<ProtectedLayout />}>
+        <Route path="courses" element={<CourseLayout />}>
           <Route index element={<Courses />} />
           <Route path="generate" element={<CourseGenerate />} />
           <Route path=":id" element={<CourseDetails />} />
           <Route path=":id/topics/:topicId" element={<CourseTopic />} />
+        </Route>
+        <Route path="users" element={<UserLayout />}>
+          <Route index element={<Profile />} />
         </Route>
       </RoutesWrapper>
     </BrowserRouter>

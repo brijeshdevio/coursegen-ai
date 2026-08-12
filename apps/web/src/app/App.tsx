@@ -3,6 +3,7 @@ import { Toaster } from "sonner";
 import { AuthProvider } from "@/providers/AuthProvider";
 
 import Routes from "./Routes";
+import "@/App.css";
 
 const queryClient = new QueryClient();
 

@@ -11,7 +11,7 @@ export function AuthLayout() {
   }
 
   if (isAuthenticated) {
-    return <Navigate to={"/courses"} />;
+    return <Navigate to={"/courses"} replace />;
   }
 
   return <Outlet />;

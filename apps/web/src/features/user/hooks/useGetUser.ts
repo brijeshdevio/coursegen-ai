@@ -5,6 +5,7 @@ export function useGetUser() {
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["users", "me"],
     queryFn: () => userService.getUser(),
+    retry: false,
   });
 
   return {

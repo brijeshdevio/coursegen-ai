@@ -1,701 +1,837 @@
+// Home.tsx — CourseGen AI Landing Page
+// Design: Dark editorial, violet accent, near-invisible borders, layered elevation
+// Font: Requires "Syne" (display) + "DM Sans" (body) — add to index.html or layout.tsx:
+// <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import {
-  Moon,
-  Sun,
-  ArrowRight,
-  Brain,
-  Zap,
-  CheckCircle2,
-  Terminal,
-  Code,
+  BookOpen,
   Sparkles,
-  Layout,
-  Video,
+  Layers,
+  Cpu,
+  ChevronRight,
+  CheckCircle2,
+  Menu,
+  X,
+  ArrowRight,
+  Zap,
+  FileText,
+  Brain,
+  LayoutDashboard,
+  Star,
+  GraduationCap,
+  Code2,
+  Briefcase,
+  Play,
+  Clock,
+  Users,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Logo } from "@/assets/Logo";
+import { Link } from "react-router-dom";
 
-export default function Home() {
-  const [isDark, setIsDark] = useState(true); // Default to dark for premium feel
+// ─── Design tokens (mapped to Shadcn CSS vars) ───────────────────────────────
+// bg: hsl(var(--background))        → near-black
+// card: hsl(var(--card))            → slightly elevated
+// border: hsl(var(--border))        → near-invisible
+// accent: violet via hsl(var(--primary))
+// text: hsl(var(--foreground)) / hsl(var(--muted-foreground))
 
-  // Toggle theme placeholder logic (assumes a standard 'dark' class on html)
+// ─── Navbar ──────────────────────────────────────────────────────────────────
+const NAV_LINKS = [
+  { label: "Features", href: "#features" },
+  { label: "How it works", href: "#how-it-works" },
+  { label: "Pricing", href: "#pricing" },
+  { label: "Blog", href: "#blog" },
+];
+
+function Navbar() {
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [isDark]);
-
-  const toggleTheme = () => setIsDark(!isDark);
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-background font-sans text-foreground selection:bg-primary/20">
-      {/* 1. Sticky Navbar */}
-      <nav className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/60 backdrop-blur-md">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Logo />
-          <div className="hidden items-center gap-6 text-sm font-medium text-muted-foreground md:flex">
-            <a
-              href="#how-it-works"
-              className="transition-colors hover:text-foreground"
-            >
-              How it Works
-            </a>
-            <a
-              href="#features"
-              className="transition-colors hover:text-foreground"
-            >
-              Features
-            </a>
-            <a
-              href="#pricing"
-              className="transition-colors hover:text-foreground"
-            >
-              Pricing
-            </a>
-            <a href="#faq" className="transition-colors hover:text-foreground">
-              FAQ
-            </a>
-          </div>
-          <div className="flex items-center gap-4">
-            <button
-              onClick={toggleTheme}
-              className="rounded-full p-2 transition-colors hover:bg-muted"
-            >
-              {isDark ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
-            <div className="hidden items-center gap-2 sm:flex">
-              <Link to="/auth/login">
-                <Button variant="ghost">Log in</Button>
-              </Link>
+    <header
+      className={cn(
+        "fixed top-0 right-0 left-0 z-50 transition-all duration-300",
+        scrolled
+          ? "border-b border-border/50 bg-background/90 backdrop-blur-md"
+          : "bg-transparent"
+      )}
+    >
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+        {/* Logo */}
+        <Logo />
 
-              <Link to="/auth/signup">
-                <Button>
-                  Start free <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-          </div>
+        {/* Desktop nav */}
+        <nav className="hidden items-center gap-1 md:flex">
+          {NAV_LINKS.map((l) => (
+            <a
+              key={l.label}
+              href={l.href}
+              className="rounded-md px-4 py-2 text-sm text-muted-foreground transition-colors hover:bg-card hover:text-foreground"
+            >
+              {l.label}
+            </a>
+          ))}
+        </nav>
+
+        {/* CTA group */}
+        <div className="hidden items-center gap-3 md:flex">
+          <Link to="/auth/login">
+            <Button variant="ghost" size="sm" className="text-sm">
+              Sign in
+            </Button>
+          </Link>
+          <Link to="/auth/signup">
+            <Button
+              size="sm"
+              className="gap-2 text-sm shadow-md shadow-primary/20"
+            >
+              Start free
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Button>
+          </Link>
         </div>
-      </nav>
 
-      {/* 2. Hero Section */}
-      <section className="relative overflow-hidden pt-24 pb-32">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,var(--tw-gradient-stops))] from-primary/10 via-background to-background" />
-        <div className="relative z-10 container mx-auto flex flex-col items-center px-4 text-center">
-          <Badge
-            variant="outline"
-            className="mb-6 rounded-full border-primary/20 bg-primary/5 px-4 py-1.5 text-primary"
-          >
-            <Sparkles className="mr-2 h-4 w-4" /> V2.0 is now live
-          </Badge>
-          <h1 className="mb-8 max-w-4xl font-display text-5xl leading-[1.1] font-extrabold tracking-tight md:text-7xl">
-            Turn any topic into a{" "}
-            <span className="bg-linear-to-r from-primary to-accent bg-clip-text text-transparent">
-              complete course
-            </span>{" "}
-            in seconds.
-          </h1>
-          <p className="mb-10 max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl">
-            CourseGen AI analyzes your brief, structures a curriculum, and
-            generates engaging modules with interactive quizzes and reading
-            materials.
-          </p>
-          <div className="mb-16 flex flex-col gap-4 sm:flex-row">
-            <Link to="/courses/generate">
-              <Button size="lg" className="h-14 px-8 text-base">
-                Generate your first course{" "}
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
+        {/* Mobile toggle */}
+        <button
+          className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-card hover:text-foreground md:hidden"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label="Toggle menu"
+        >
+          {mobileOpen ? (
+            <X className="h-5 w-5" />
+          ) : (
+            <Menu className="h-5 w-5" />
+          )}
+        </button>
+      </div>
 
-            <Button size="lg" variant="outline" className="h-14 px-8 text-base">
-              View Example
+      {/* Mobile menu */}
+      {mobileOpen && (
+        <div className="border-b border-border/50 bg-background/95 px-4 pb-4 backdrop-blur-md md:hidden">
+          {NAV_LINKS.map((l) => (
+            <a
+              key={l.label}
+              href={l.href}
+              className="block border-b border-border/30 py-3 text-sm text-muted-foreground last:border-0 hover:text-foreground"
+              onClick={() => setMobileOpen(false)}
+            >
+              {l.label}
+            </a>
+          ))}
+          <div className="mt-4 flex gap-3">
+            <Button variant="outline" size="sm" className="flex-1 text-sm">
+              Sign in
+            </Button>
+            <Button size="sm" className="flex-1 text-sm">
+              Start free
             </Button>
           </div>
-
-          {/* Floating Terminal-style AI Output Preview */}
-          <div className="relative w-full max-w-4xl overflow-hidden rounded-xl border border-border bg-card shadow-2xl">
-            <div className="absolute top-0 left-0 flex h-12 w-full items-center gap-2 border-b border-border bg-muted/50 px-4">
-              <div className="flex gap-1.5">
-                <div className="h-3 w-3 rounded-full bg-destructive/80"></div>
-                <div className="h-3 w-3 rounded-full bg-amber-500/80"></div>
-                <div className="h-3 w-3 rounded-full bg-emerald-500/80"></div>
-              </div>
-              <div className="mx-auto rounded-md border border-border bg-background px-3 py-1 font-mono text-xs text-muted-foreground">
-                ~ coursegen --topic "Quantum Computing"
-              </div>
-            </div>
-            <div className="p-6 pt-16 text-left font-mono text-sm sm:text-base">
-              <div className="mb-2 flex gap-2 text-primary">
-                <Terminal className="h-5 w-5" />
-                <span>Analyzing prompt...</span>
-              </div>
-              <div className="mb-4 pl-7 text-muted-foreground">
-                Creating curriculum structure for "Quantum Computing for
-                Beginners"
-              </div>
-
-              <div className="space-y-3 pl-7">
-                <div className="flex items-center gap-3">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                  <span className="text-foreground">
-                    Module 1: Introduction to Qubits
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                  <span className="text-foreground">
-                    Module 2: Superposition & Entanglement
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></span>
-                  <span className="font-medium text-primary">
-                    Generating Module 3: Quantum Gates...
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div className="pointer-events-none absolute bottom-0 left-0 h-32 w-full bg-linear-to-t from-card to-transparent" />
-          </div>
         </div>
-      </section>
+      )}
+    </header>
+  );
+}
 
-      {/* 3. How it Works */}
-      <section
-        id="how-it-works"
-        className="border-y border-border/50 bg-muted/30 py-24"
-      >
-        <div className="container mx-auto px-4">
-          <div className="mb-16 md:mb-24">
-            <h2 className="mb-4 font-display text-3xl font-bold md:text-5xl">
-              How it works
-            </h2>
-            <p className="max-w-xl text-lg text-muted-foreground">
-              From a single sentence to a fully interactive curriculum in three
-              simple steps.
-            </p>
-          </div>
+// ─── Section 1: Hero ─────────────────────────────────────────────────────────
+function HeroSection() {
+  return (
+    <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 pt-16 pb-24">
+      {/* Background radial glow — signature element */}
+      {/* SIGNATURE: Layered radial mesh using pseudo-divs to create depth without images */}
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+        <div
+          className="absolute top-1/3 left-1/2 h-150 w-150 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-[0.07]"
+          style={{
+            background:
+              "radial-gradient(circle, hsl(var(--primary)) 0%, transparent 70%)",
+          }}
+        />
+        <div
+          className="absolute top-1/2 left-1/4 h-75 w-75 rounded-full opacity-[0.04]"
+          style={{
+            background:
+              "radial-gradient(circle, hsl(var(--primary)) 0%, transparent 70%)",
+          }}
+        />
+        <div
+          className="absolute right-1/4 bottom-1/3 h-50 w-50 rounded-full opacity-[0.04]"
+          style={{
+            background:
+              "radial-gradient(circle, hsl(var(--primary)) 0%, transparent 70%)",
+          }}
+        />
+        {/* Subtle grid pattern */}
+        <div
+          className="absolute inset-0 opacity-[0.015]"
+          style={{
+            backgroundImage:
+              "linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)",
+            backgroundSize: "64px 64px",
+          }}
+        />
+      </div>
 
-          <div className="relative grid gap-8 md:grid-cols-3">
-            <div className="absolute top-12 right-[15%] left-[15%] hidden h-px bg-linear-to-r from-transparent via-border to-transparent md:block" />
+      <div className="relative mx-auto max-w-4xl text-center">
+        {/* Pill badge */}
+        <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary">
+          <Sparkles className="h-3 w-3" />
+          Powered by Llama 3.3 70B via Groq
+        </div>
 
-            {[
-              {
-                num: "01",
-                title: "Set the parameters",
-                desc: "Define your topic, target audience, and desired length. Provide any existing materials or guidelines.",
-              },
-              {
-                num: "02",
-                title: "AI generates structure",
-                desc: "Our engine crafts a logical curriculum, breaking down complex topics into digestible modules.",
-              },
-              {
-                num: "03",
-                title: "Review and publish",
-                desc: "Tweak the generated content, add your own flair, and instantly publish or export the course.",
-              },
-            ].map((step, i) => (
-              <div key={i} className="group relative z-10 flex flex-col">
-                <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-2xl border border-border bg-card font-display text-3xl font-bold text-primary shadow-sm transition-transform group-hover:-translate-y-1">
-                  {step.num}
+        {/* Hero headline */}
+        <h1
+          className="mb-6 text-4xl leading-[1.05] font-extrabold tracking-tight text-foreground sm:text-5xl md:text-6xl lg:text-7xl"
+          style={{ fontFamily: "'Syne', sans-serif" }}
+        >
+          Generate full courses
+          <br />
+          <span className="text-primary">in seconds with AI</span>
+        </h1>
+
+        {/* Subheadline */}
+        <p
+          className="mx-auto mb-10 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg"
+          style={{ fontFamily: "'DM Sans', sans-serif" }}
+        >
+          CourseGen AI turns any topic into a structured, markdown-rich course —
+          complete with modules, topics, and content — instantly. Built for
+          educators, creators, and developers.
+        </p>
+
+        {/* CTAs */}
+        <div className="mb-16 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <Link to="/courses/generate">
+            <Button
+              size="lg"
+              className="h-12 gap-2 px-8 text-base shadow-xl shadow-primary/25"
+            >
+              <Zap className="h-4 w-4" />
+              Generate your first course
+            </Button>
+          </Link>
+
+          <Button
+            variant="outline"
+            size="lg"
+            className="h-12 gap-2 border-border/60 px-8 text-base"
+          >
+            <Play className="h-4 w-4" />
+            Watch demo
+          </Button>
+        </div>
+
+        {/* Social proof strip */}
+        <div className="flex flex-col items-center justify-center gap-6 text-sm text-muted-foreground sm:flex-row">
+          <div className="flex items-center gap-2">
+            <div className="flex -space-x-2">
+              {["#7c3aed", "#6d28d9", "#5b21b6", "#4c1d95"].map((c, i) => (
+                <div
+                  key={i}
+                  className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-background text-[10px] font-medium text-white"
+                  style={{ background: c }}
+                >
+                  {["A", "R", "S", "K"][i]}
                 </div>
-                <h3 className="mb-3 text-xl font-bold">{step.title}</h3>
-                <p className="leading-relaxed text-muted-foreground">
-                  {step.desc}
-                </p>
-              </div>
+              ))}
+            </div>
+            <span>2,400+ courses created</span>
+          </div>
+          <Separator orientation="vertical" className="hidden h-4 sm:block" />
+          <div className="flex items-center gap-1.5">
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} className="h-3.5 w-3.5 fill-primary text-primary" />
             ))}
+            <span>4.9 · 340 reviews</span>
+          </div>
+          <Separator orientation="vertical" className="hidden h-4 sm:block" />
+          <div className="flex items-center gap-1.5">
+            <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+            <span>No credit card required</span>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* 4. Features (Bento Grid) */}
-      <section id="features" className="py-32">
-        <div className="container mx-auto px-4">
-          <div className="mb-20 text-center">
-            <h2 className="mb-6 font-display text-3xl font-bold md:text-5xl">
-              Everything you need to teach
-            </h2>
-            <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-              Powerful features designed to help you create engaging,
-              high-quality educational content at scale.
-            </p>
-          </div>
-
-          <div className="grid auto-rows-[300px] gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <Card className="group relative col-span-1 overflow-hidden border-border/50 bg-linear-to-br from-card to-card/50 transition-colors hover:border-primary/30 md:col-span-2 lg:col-span-2">
-              <CardHeader className="relative z-10">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                  <Brain className="h-6 w-6 text-primary" />
-                </div>
-                <CardTitle className="text-2xl">
-                  Adaptive AI Generation
-                </CardTitle>
-                <CardDescription className="mt-2 max-w-md text-base">
-                  Our models adjust the tone, complexity, and pacing based on
-                  your specified target audience.
-                </CardDescription>
-              </CardHeader>
-              <div className="pointer-events-none absolute right-0 bottom-0 h-2/3 w-2/3 rounded-tl-[100px] bg-linear-to-tl from-primary/10 to-transparent transition-transform duration-500 group-hover:scale-110" />
-            </Card>
-
-            <Card className="border-border/50 bg-card transition-colors hover:border-primary/30">
-              <CardHeader>
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-500/10">
-                  <Zap className="h-6 w-6 text-emerald-500" />
-                </div>
-                <CardTitle className="text-xl">Instant Quizzes</CardTitle>
-                <CardDescription className="mt-2 text-base">
-                  Automatically generate knowledge checks and assessments for
-                  every module.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="border-border/50 bg-card transition-colors hover:border-primary/30">
-              <CardHeader>
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-500/10">
-                  <Code className="h-6 w-6 text-blue-500" />
-                </div>
-                <CardTitle className="text-xl">Rich Formatting</CardTitle>
-                <CardDescription className="mt-2 text-base">
-                  Support for code blocks, math equations, tables, and Markdown.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="border-border/50 bg-card transition-colors hover:border-primary/30">
-              <CardHeader>
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-purple-500/10">
-                  <Video className="h-6 w-6 text-purple-500" />
-                </div>
-                <CardTitle className="text-xl">Media Integration</CardTitle>
-                <CardDescription className="mt-2 text-base">
-                  Seamlessly embed videos, images, and external resources into
-                  your lessons.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="relative col-span-1 overflow-hidden border-border/50 bg-card transition-colors hover:border-primary/30 md:col-span-2 lg:col-span-1">
-              <CardHeader>
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-amber-500/10">
-                  <Layout className="h-6 w-6 text-amber-500" />
-                </div>
-                <CardTitle className="text-xl">Custom Branding</CardTitle>
-                <CardDescription className="mt-2 text-base">
-                  Make it yours with custom domains, logos, and color schemes.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. Pricing */}
-      <section
-        id="pricing"
-        className="border-y border-border/50 bg-muted/30 py-32"
-      >
-        <div className="container mx-auto px-4">
-          <div className="mb-20 text-center">
-            <h2 className="mb-6 font-display text-3xl font-bold md:text-5xl">
-              Simple, transparent pricing
-            </h2>
-            <p className="mx-auto max-w-xl text-lg text-muted-foreground">
-              Start for free, upgrade when you need more power.
-            </p>
-          </div>
-
-          <div className="mx-auto grid max-w-6xl gap-8 md:grid-cols-3">
-            {/* Free */}
-            <Card className="border-border/50 bg-card">
-              <CardHeader>
-                <CardTitle className="text-2xl">Free</CardTitle>
-                <CardDescription>
-                  Perfect for exploring the platform.
-                </CardDescription>
-                <div className="mt-4 flex items-baseline font-display text-5xl font-extrabold">
-                  $0
-                  <span className="ml-1 text-xl font-medium text-muted-foreground">
-                    /mo
-                  </span>
-                </div>
-              </CardHeader>
-              <CardContent className="mt-6">
-                <ul className="space-y-4">
-                  {[
-                    "3 courses per month",
-                    "Standard AI models",
-                    "Basic templates",
-                    "Community support",
-                  ].map((feat, i) => (
-                    <li key={i} className="flex items-center gap-3">
-                      <CheckCircle2 className="h-5 w-5 text-primary" />
-                      <span className="text-muted-foreground">{feat}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-              <CardFooter className="pt-6">
-                <Button variant="outline" className="w-full">
-                  Get Started
-                </Button>
-              </CardFooter>
-            </Card>
-
-            {/* Pro */}
-            <Card className="relative border-primary bg-card shadow-2xl shadow-primary/10">
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                <Badge className="border-none bg-primary px-3 py-1 text-xs font-bold tracking-wider text-primary-foreground uppercase hover:bg-primary">
-                  Most Popular
-                </Badge>
+      {/* Hero card preview — floating UI mockup */}
+      <div className="relative mx-auto mt-20 w-full max-w-3xl">
+        <div className="overflow-hidden rounded-xl border border-border/50 bg-card shadow-2xl shadow-black/30">
+          {/* Window chrome */}
+          <div className="flex items-center gap-2 border-b border-border/50 bg-card/80 px-4 py-3">
+            <div className="h-3 w-3 rounded-full bg-red-500/60" />
+            <div className="h-3 w-3 rounded-full bg-yellow-500/60" />
+            <div className="h-3 w-3 rounded-full bg-green-500/60" />
+            <div className="mx-4 flex-1">
+              <div className="rounded-md bg-background/60 px-3 py-1 text-center font-mono text-xs text-muted-foreground">
+                coursegen.ai/generate
               </div>
-              <CardHeader>
-                <CardTitle className="text-2xl text-primary">Pro</CardTitle>
-                <CardDescription>
-                  For serious creators and educators.
-                </CardDescription>
-                <div className="mt-4 flex items-baseline font-display text-5xl font-extrabold">
-                  $29
-                  <span className="ml-1 text-xl font-medium text-muted-foreground">
-                    /mo
+            </div>
+          </div>
+          {/* Mock course output */}
+          <div className="space-y-4 bg-background/40 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="mb-1 text-xs text-muted-foreground">
+                  Generated course
+                </p>
+                <h3
+                  className="text-lg font-bold text-foreground"
+                  style={{ fontFamily: "'Syne', sans-serif" }}
+                >
+                  Full-Stack Web Development with React & Node.js
+                </h3>
+              </div>
+              <Badge className="border-primary/20 bg-primary/10 text-xs text-primary">
+                AI Generated
+              </Badge>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { icon: Layers, label: "6 modules" },
+                { icon: FileText, label: "24 topics" },
+                { icon: Clock, label: "~18 hrs" },
+              ].map(({ icon: Icon, label }) => (
+                <div
+                  key={label}
+                  className="flex items-center gap-2 rounded-lg border border-border/30 bg-card/60 px-3 py-2"
+                >
+                  <Icon className="h-3.5 w-3.5 shrink-0 text-primary" />
+                  <span className="text-xs text-muted-foreground">{label}</span>
+                </div>
+              ))}
+            </div>
+            <div className="space-y-2">
+              {[
+                "Introduction to Modern Web Development",
+                "React Fundamentals & Component Architecture",
+                "State Management with Context & Zustand",
+              ].map((title, i) => (
+                <div
+                  key={i}
+                  className="group flex cursor-pointer items-center gap-3 rounded-lg border border-border/30 bg-card/40 p-3 transition-colors hover:bg-card/70"
+                >
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary/10">
+                    <span className="text-[10px] font-bold text-primary">
+                      {i + 1}
+                    </span>
+                  </div>
+                  <span className="flex-1 text-sm text-foreground">
+                    {title}
+                  </span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+                </div>
+              ))}
+              <div className="flex items-center gap-3 rounded-lg border border-dashed border-border/30 p-3 opacity-40">
+                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted">
+                  <span className="text-[10px] font-bold text-muted-foreground">
+                    4
                   </span>
                 </div>
-              </CardHeader>
-              <CardContent className="mt-6">
-                <ul className="space-y-4">
-                  {[
-                    "Unlimited courses",
-                    "Advanced AI models (GPT-4)",
-                    "Custom branding",
-                    "Priority support",
-                    "Export to LMS (SCORM)",
-                  ].map((feat, i) => (
-                    <li key={i} className="flex items-center gap-3">
-                      <CheckCircle2 className="h-5 w-5 text-primary" />
-                      <span className="text-foreground">{feat}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-              <CardFooter className="pt-6">
-                <Button className="w-full">Upgrade to Pro</Button>
-              </CardFooter>
-            </Card>
-
-            {/* Team */}
-            <Card className="border-border/50 bg-card">
-              <CardHeader>
-                <CardTitle className="text-2xl">Team</CardTitle>
-                <CardDescription>
-                  For organizations scaling their training.
-                </CardDescription>
-                <div className="mt-4 flex items-baseline font-display text-5xl font-extrabold">
-                  $99
-                  <span className="ml-1 text-xl font-medium text-muted-foreground">
-                    /mo
-                  </span>
-                </div>
-              </CardHeader>
-              <CardContent className="mt-6">
-                <ul className="space-y-4">
-                  {[
-                    "Everything in Pro",
-                    "5 Team seats",
-                    "Collaborative editing",
-                    "Advanced analytics",
-                    "Dedicated success manager",
-                  ].map((feat, i) => (
-                    <li key={i} className="flex items-center gap-3">
-                      <CheckCircle2 className="h-5 w-5 text-primary" />
-                      <span className="text-muted-foreground">{feat}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-              <CardFooter className="pt-6">
-                <Button variant="outline" className="w-full">
-                  Contact Sales
-                </Button>
-              </CardFooter>
-            </Card>
+                <div className="h-3 w-48 rounded-full bg-muted" />
+              </div>
+            </div>
           </div>
         </div>
-      </section>
-
-      {/* 6. Testimonials */}
-      <section className="py-32">
-        <div className="container mx-auto px-4">
-          <div className="mb-20 text-center">
-            <h2 className="mb-6 font-display text-3xl font-bold md:text-5xl">
-              Loved by educators
-            </h2>
+        {/* Floating stats card — grid-breaking element */}
+        <div className="absolute -right-4 -bottom-6 hidden sm:block">
+          <div className="w-44 rounded-xl border border-border/50 bg-card p-4 shadow-xl shadow-black/20">
+            <p className="mb-1 text-xs text-muted-foreground">
+              Generation time
+            </p>
+            <p
+              className="text-2xl font-bold text-primary"
+              style={{ fontFamily: "'Syne', sans-serif" }}
+            >
+              3.2s
+            </p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              avg. for full course
+            </p>
           </div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
-          <div className="grid gap-8 md:grid-cols-3">
-            {[
-              {
-                q: "CourseGen AI cut our curriculum development time by 80%. What used to take weeks now takes an afternoon.",
-                a: "Sarah L.",
-                role: "Instructional Designer",
-                initials: "SL",
-              },
-              {
-                q: "The quality of the generated quizzes is outstanding. It captures the nuance of the material perfectly.",
-                a: "Dr. James K.",
-                role: "University Professor",
-                initials: "JK",
-              },
-              {
-                q: "As a solo creator, this tool is like having a full team of researchers and writers at my disposal.",
-                a: "Elena M.",
-                role: "Content Creator",
-                initials: "EM",
-              },
-            ].map((t, i) => (
-              <Card key={i} className="border-none bg-muted/30 shadow-none">
-                <CardContent className="pt-8">
-                  <div className="mb-6 flex gap-1">
-                    {[1, 2, 3, 4, 5].map((s) => (
-                      <Sparkles
-                        key={s}
-                        className="h-4 w-4 fill-amber-500 text-amber-500"
-                      />
-                    ))}
+// ─── Section 2: Features ─────────────────────────────────────────────────────
+const FEATURES = [
+  {
+    icon: Brain,
+    title: "AI-powered course generation",
+    description:
+      "Enter a topic and get a fully structured course with modules, topics, and rich markdown content — generated by Llama 3.3 70B in seconds.",
+    tag: "Core",
+  },
+  {
+    icon: Layers,
+    title: "Course → Module → Topic hierarchy",
+    description:
+      "Professionally structured content following a natural learning hierarchy. Each topic gets deep markdown content with examples, explanations, and code snippets.",
+    tag: "Structure",
+  },
+  {
+    icon: Cpu,
+    title: "Groq-accelerated inference",
+    description:
+      "Runs on Groq's LPU inference engine — the fastest LLM runtime available. Get full course content without the typical AI wait times.",
+    tag: "Performance",
+  },
+  {
+    icon: LayoutDashboard,
+    title: "Creator dashboard",
+    description:
+      "Manage all your generated courses in one place. Edit titles, reorder modules, regenerate individual topics, and export — all from a clean dashboard.",
+    tag: "Management",
+  },
+  {
+    icon: FileText,
+    title: "Markdown-rich content",
+    description:
+      "Every topic is generated with structured markdown — headings, bullet points, code blocks, and more. Ready to publish, embed, or export anywhere.",
+    tag: "Content",
+  },
+  {
+    icon: Zap,
+    title: "Zod-validated output",
+    description:
+      "AI responses are validated against strict Zod schemas. No broken JSON, no malformed content — every generated course is structurally guaranteed.",
+    tag: "Reliability",
+  },
+];
+
+function FeaturesSection() {
+  return (
+    <section id="features" className="relative px-4 py-24">
+      <div className="mx-auto max-w-6xl">
+        {/* Section header */}
+        <div className="mb-16 max-w-2xl">
+          <Badge
+            variant="outline"
+            className="mb-4 border-primary/30 bg-primary/5 text-primary"
+          >
+            Features
+          </Badge>
+          <h2
+            className="mb-4 text-3xl leading-tight font-bold text-foreground sm:text-4xl md:text-5xl"
+            style={{ fontFamily: "'Syne', sans-serif" }}
+          >
+            Everything you need to
+            <br />
+            <span className="text-primary">ship courses fast</span>
+          </h2>
+          <p className="text-base leading-relaxed text-muted-foreground">
+            CourseGen AI handles the heavy lifting — structure, content,
+            formatting. You focus on what matters: teaching.
+          </p>
+        </div>
+
+        {/* Feature grid */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {FEATURES.map((f, i) => (
+            <Card
+              key={f.title}
+              className={cn(
+                "group border-border/40 bg-card/40 transition-all duration-200 hover:bg-card/70",
+                i === 0 && "sm:col-span-2 lg:col-span-1"
+              )}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 transition-colors group-hover:bg-primary/20">
+                    <f.icon className="h-5 w-5 text-primary" />
                   </div>
-                  <p className="mb-8 text-lg leading-relaxed text-foreground">
-                    "{t.q}"
-                  </p>
-                  <div className="flex items-center gap-4">
-                    <Avatar>
-                      <AvatarFallback className="bg-primary/10 text-primary">
-                        {t.initials}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="text-sm font-semibold">{t.a}</p>
-                      <p className="text-xs text-muted-foreground">{t.role}</p>
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-2 flex items-center gap-2">
+                      <h3
+                        className="text-base font-semibold text-foreground"
+                        style={{ fontFamily: "'Syne', sans-serif" }}
+                      >
+                        {f.title}
+                      </h3>
+                    </div>
+                    <p className="text-sm leading-relaxed text-muted-foreground">
+                      {f.description}
+                    </p>
+                    <Badge
+                      variant="secondary"
+                      className="mt-3 px-2 py-0.5 text-xs"
+                    >
+                      {f.tag}
+                    </Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Section 3: How It Works ──────────────────────────────────────────────────
+const STEPS = [
+  {
+    step: "01",
+    icon: FileText,
+    title: "Enter a topic",
+    description:
+      'Type any subject — "Machine Learning for beginners", "Advanced React patterns", or "Digital Marketing 101". Add optional context to shape the output.',
+  },
+  {
+    step: "02",
+    icon: Sparkles,
+    title: "AI generates the structure",
+    description:
+      "CourseGen AI creates a full course outline — modules, topics, learning objectives — all organized logically for progressive learning.",
+  },
+  {
+    step: "03",
+    icon: Brain,
+    title: "Content gets generated",
+    description:
+      "Each topic gets deep markdown content via Groq's ultra-fast Llama 3.3 70B. Code examples, explanations, and summaries — all included.",
+  },
+  {
+    step: "04",
+    icon: LayoutDashboard,
+    title: "Edit, publish, or export",
+    description:
+      "Review and tweak any module or topic from your dashboard. Regenerate individual sections, reorder content, and publish or export when ready.",
+  },
+];
+
+function HowItWorksSection() {
+  return (
+    <section id="how-it-works" className="bg-card/20 px-4 py-24">
+      <div className="mx-auto max-w-6xl">
+        <div className="mx-auto mb-16 max-w-2xl text-center">
+          <Badge
+            variant="outline"
+            className="mb-4 border-primary/30 bg-primary/5 text-primary"
+          >
+            How it works
+          </Badge>
+          <h2
+            className="mb-4 text-3xl font-bold text-foreground sm:text-4xl md:text-5xl"
+            style={{ fontFamily: "'Syne', sans-serif" }}
+          >
+            From idea to course
+            <br />
+            <span className="text-primary">in four steps</span>
+          </h2>
+          <p className="text-base text-muted-foreground">
+            No complex setup, no prompt engineering. Just type your topic and
+            CourseGen handles the rest.
+          </p>
+        </div>
+
+        {/* Steps — asymmetric layout */}
+        <div className="relative">
+          {/* Connector line (desktop) */}
+          <div
+            className="absolute top-14 right-[calc(12.5%+1px)] left-[calc(12.5%+1px)] hidden h-px lg:block"
+            style={{
+              background:
+                "linear-gradient(90deg, transparent, hsl(var(--primary)/0.3), hsl(var(--primary)/0.3), transparent)",
+            }}
+            aria-hidden="true"
+          />
+
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {STEPS.map((s, i) => (
+              <div key={s.step} className="relative flex flex-col">
+                {/* Step indicator */}
+                <div className="mb-6 flex lg:justify-center">
+                  <div className="relative">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
+                      <s.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary">
+                      <span className="text-[9px] font-bold text-primary-foreground">
+                        {i + 1}
+                      </span>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+
+                <div className="lg:text-center">
+                  <span className="mb-2 block font-mono text-xs text-primary/50">
+                    {s.step}
+                  </span>
+                  <h3
+                    className="mb-2 text-base font-bold text-foreground"
+                    style={{ fontFamily: "'Syne', sans-serif" }}
+                  >
+                    {s.title}
+                  </h3>
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                    {s.description}
+                  </p>
+                </div>
+              </div>
             ))}
           </div>
         </div>
-      </section>
 
-      {/* 7. FAQ */}
-      <section id="faq" className="border-t border-border/50 bg-muted/30 py-32">
-        <div className="container mx-auto max-w-6xl px-4">
-          <div className="grid gap-12 md:grid-cols-12">
-            <div className="relative md:col-span-5">
-              <div className="sticky top-32">
-                <h2 className="mb-6 font-display text-3xl font-bold md:text-5xl">
-                  Common questions
-                </h2>
-                <p className="mb-8 text-lg text-muted-foreground">
-                  Everything you need to know about the product and billing.
-                </p>
-                <Button variant="outline">Contact Support</Button>
+        {/* Use case pills */}
+        <div className="mt-20 text-center">
+          <p className="mb-4 text-xs tracking-widest text-muted-foreground uppercase">
+            Used by
+          </p>
+          <div className="flex flex-wrap justify-center gap-3">
+            {[
+              { icon: GraduationCap, label: "Educators" },
+              { icon: Code2, label: "Developers" },
+              { icon: Briefcase, label: "Content creators" },
+              { icon: Users, label: "Bootcamp instructors" },
+              { icon: BookOpen, label: "Course marketplaces" },
+            ].map(({ icon: Icon, label }) => (
+              <div
+                key={label}
+                className="flex items-center gap-2 rounded-full border border-border/50 bg-card/60 px-4 py-2 text-sm text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground"
+              >
+                <Icon className="h-3.5 w-3.5 text-primary" />
+                {label}
               </div>
-            </div>
-            <div className="md:col-span-7">
-              <Accordion className="w-full">
-                {[
-                  {
-                    q: "How accurate is the AI-generated content?",
-                    a: "We use state-of-the-art models fine-tuned specifically for educational content. However, we always recommend reviewing and verifying the output before publishing to your students.",
-                  },
-                  {
-                    q: "Can I export the courses to my own LMS?",
-                    a: "Yes. Pro and Team plans support SCORM export, allowing you to seamlessly integrate the generated courses into Canvas, Moodle, Blackboard, and other popular LMS platforms.",
-                  },
-                  {
-                    q: "What languages are supported?",
-                    a: "Currently, we fully support English, Spanish, French, and German. We are actively working on adding more languages in the coming months.",
-                  },
-                  {
-                    q: "Is there a limit on how long a course can be?",
-                    a: "Free users can generate up to 5 modules per course. Pro users can generate up to 20 modules, and Team users have unlimited module generation.",
-                  },
-                ].map((faq, i) => (
-                  <AccordionItem
-                    key={i}
-                    value={`item-${i}`}
-                    className="border-b border-b-border/50 py-2"
-                  >
-                    <AccordionTrigger className="text-left text-lg font-medium transition-colors hover:text-primary hover:no-underline">
-                      {faq.q}
-                    </AccordionTrigger>
-                    <AccordionContent className="pt-2 pb-6 text-base leading-relaxed text-muted-foreground">
-                      {faq.a}
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            </div>
+            ))}
           </div>
         </div>
-      </section>
+      </div>
+    </section>
+  );
+}
 
-      {/* 8. CTA Banner */}
-      <section className="py-24">
-        <div className="container mx-auto max-w-5xl px-4">
-          <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-primary/40 via-accent/20 to-primary/40 p-1">
-            <div className="absolute inset-0 bg-background/90 backdrop-blur-xl"></div>
-            <div className="relative z-10 flex flex-col items-center rounded-[1.4rem] border border-border/50 bg-card/50 p-12 text-center md:p-20">
-              <h2 className="mb-6 font-display text-4xl font-bold md:text-5xl">
-                Ready to transform your teaching?
-              </h2>
-              <p className="mb-10 max-w-2xl text-xl text-muted-foreground">
-                Join thousands of creators who are building the future of
-                education with CourseGen AI.
-              </p>
-              <Link to="/courses/generate">
-                <Button size="lg" className="h-14 rounded-full px-10 text-lg">
-                  Generate your first course{" "}
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-            </div>
-          </div>
+// ─── Section 4: CTA / Social proof ──────────────────────────────────────────
+const TESTIMONIALS = [
+  {
+    quote:
+      "I built a 6-module React course in under 5 minutes. The structure was so good I barely had to edit anything.",
+    author: "Ananya S.",
+    role: "Frontend Developer & Instructor",
+    avatar: "AS",
+  },
+  {
+    quote:
+      "CourseGen AI saved me weeks of planning. The Groq-powered generation is genuinely fast — I thought it would time out.",
+    author: "Rahul M.",
+    role: "EdTech Founder",
+    avatar: "RM",
+  },
+  {
+    quote:
+      "I generate course outlines for my coaching students on-demand. It's become a core part of my teaching workflow.",
+    author: "Priya K.",
+    role: "Career Coach",
+    avatar: "PK",
+  },
+];
+
+function CtaSection() {
+  return (
+    <section id="pricing" className="px-4 py-24">
+      <div className="mx-auto max-w-6xl">
+        {/* Testimonials */}
+        <div className="mb-12 text-center">
+          <Badge
+            variant="outline"
+            className="mb-4 border-primary/30 bg-primary/5 text-primary"
+          >
+            Testimonials
+          </Badge>
+          <h2
+            className="text-3xl font-bold text-foreground sm:text-4xl"
+            style={{ fontFamily: "'Syne', sans-serif" }}
+          >
+            Creators love CourseGen AI
+          </h2>
         </div>
-      </section>
 
-      {/* 9. Footer */}
-      <footer className="border-t border-border bg-muted/50 py-16">
-        <div className="container mx-auto px-4">
-          <div className="mb-16 grid grid-cols-2 gap-8 md:grid-cols-4 lg:grid-cols-5">
-            <div className="col-span-2 lg:col-span-2">
-              <div className="mb-6 flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary font-display font-bold text-primary-foreground">
-                  CG
+        <div className="mb-20 grid grid-cols-1 gap-4 md:grid-cols-3">
+          {TESTIMONIALS.map((t) => (
+            <Card
+              key={t.author}
+              className="border-border/40 bg-card/40 transition-colors hover:bg-card/70"
+            >
+              <CardContent className="p-6">
+                <div className="mb-4 flex gap-1">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className="h-3.5 w-3.5 fill-primary text-primary"
+                    />
+                  ))}
                 </div>
-                <span className="font-display text-xl font-bold tracking-tight">
-                  CourseGen AI
-                </span>
-              </div>
-              <p className="mb-6 max-w-xs text-muted-foreground">
-                Empowering educators with artificial intelligence to build
-                better learning experiences.
+                <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
+                  "{t.quote}"
+                </p>
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-primary/20 bg-primary/10 text-xs font-bold text-primary">
+                    {t.avatar}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">
+                      {t.author}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{t.role}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* CTA banner — SIGNATURE ELEMENT: asymmetric split with glowing corner accent */}
+        <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-card">
+          {/* Corner accent */}
+          <div
+            className="pointer-events-none absolute top-0 right-0 h-80 w-80 opacity-10"
+            aria-hidden="true"
+            style={{
+              background:
+                "radial-gradient(circle at top right, hsl(var(--primary)), transparent 70%)",
+            }}
+          />
+          <div className="relative grid grid-cols-1 items-center gap-8 p-8 sm:p-12 md:grid-cols-2">
+            <div>
+              <h2
+                className="mb-4 text-3xl leading-tight font-bold text-foreground sm:text-4xl"
+                style={{ fontFamily: "'Syne', sans-serif" }}
+              >
+                Build your first
+                <br />
+                <span className="text-primary">AI course today</span>
+              </h2>
+              <p className="mb-6 text-base leading-relaxed text-muted-foreground">
+                Free to start. No prompt engineering. No setup. Just enter a
+                topic and watch CourseGen AI do the work.
               </p>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Link to="/courses/generate">
+                  <Button
+                    size="lg"
+                    className="h-12 gap-2 px-8 shadow-xl shadow-primary/25"
+                  >
+                    <Zap className="h-4 w-4" />
+                    Start generating — it's free
+                  </Button>
+                </Link>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="h-12 border-border/60 px-8"
+                >
+                  View pricing
+                </Button>
+              </div>
             </div>
-            <div>
-              <h4 className="mb-4 font-semibold">Product</h4>
-              <ul className="space-y-3 text-sm text-muted-foreground">
-                <li>
-                  <a href="#" className="transition-colors hover:text-primary">
-                    Features
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="transition-colors hover:text-primary">
-                    Pricing
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="transition-colors hover:text-primary">
-                    Templates
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="transition-colors hover:text-primary">
-                    Changelog
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="mb-4 font-semibold">Resources</h4>
-              <ul className="space-y-3 text-sm text-muted-foreground">
-                <li>
-                  <a href="#" className="transition-colors hover:text-primary">
-                    Documentation
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="transition-colors hover:text-primary">
-                    Blog
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="transition-colors hover:text-primary">
-                    Community
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="transition-colors hover:text-primary">
-                    Help Center
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="mb-4 font-semibold">Company</h4>
-              <ul className="space-y-3 text-sm text-muted-foreground">
-                <li>
-                  <a href="#" className="transition-colors hover:text-primary">
-                    About
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="transition-colors hover:text-primary">
-                    Careers
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="transition-colors hover:text-primary">
-                    Privacy
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="transition-colors hover:text-primary">
-                    Terms
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="flex flex-col items-center justify-between border-t border-border/50 pt-8 text-sm text-muted-foreground md:flex-row">
-            <p>
-              © {new Date().getFullYear()} CourseGen AI. All rights reserved.
-            </p>
-            <div className="mt-4 flex gap-4 md:mt-0">
-              <a href="#" className="transition-colors hover:text-primary">
-                Twitter
-              </a>
-              <a href="#" className="transition-colors hover:text-primary">
-                GitHub
-              </a>
-              <a href="#" className="transition-colors hover:text-primary">
-                Discord
-              </a>
+            <div className="space-y-3">
+              {[
+                "Generate unlimited courses on the free plan",
+                "Full markdown content for every topic",
+                "Edit, regenerate, and reorder anytime",
+                "No credit card required to start",
+                "Export to PDF, Markdown, or your CMS",
+              ].map((point) => (
+                <div key={point} className="flex items-start gap-3">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                  <span className="text-sm text-muted-foreground">{point}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-      </footer>
+      </div>
+    </section>
+  );
+}
+
+// ─── Footer ───────────────────────────────────────────────────────────────────
+const FOOTER_LINKS = {
+  Product: ["Features", "Pricing", "Changelog", "Roadmap"],
+  Developers: ["API docs", "Integrations", "Status"],
+  Company: ["About", "Blog", "Careers", "Contact"],
+  Legal: ["Privacy", "Terms", "Cookies"],
+};
+
+function Footer() {
+  return (
+    <footer className="border-t border-border/40 bg-card/20 px-4 py-16">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-12 grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-5">
+          {/* Brand col */}
+          <div className="col-span-2 sm:col-span-3 lg:col-span-1">
+            <div className="mb-4">
+              <Logo />
+            </div>
+            <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
+              AI-powered course generation for educators, creators, and
+              developers. Powered by Groq + Llama 3.3.
+            </p>
+          </div>
+
+          {/* Link columns */}
+          {Object.entries(FOOTER_LINKS).map(([group, links]) => (
+            <div key={group}>
+              <p className="mb-4 text-xs font-semibold tracking-widest text-foreground uppercase">
+                {group}
+              </p>
+              <ul className="space-y-2.5">
+                {links.map((l) => (
+                  <li key={l}>
+                    <a
+                      href="#"
+                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      {l}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        <Separator className="mb-8 opacity-40" />
+
+        <div className="flex flex-col items-center justify-between gap-4 text-xs text-muted-foreground sm:flex-row">
+          <p>© 2025 CourseGen AI. All rights reserved.</p>
+          <div className="flex items-center gap-1.5">
+            <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
+            All systems operational
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+// ─── Root export ─────────────────────────────────────────────────────────────
+export default function Home() {
+  return (
+    <div
+      className="min-h-screen bg-background text-foreground"
+      style={{ fontFamily: "'DM Sans', sans-serif" }}
+    >
+      <Navbar />
+      <main className="pt-20">
+        <HeroSection />
+        <FeaturesSection />
+        <HowItWorksSection />
+        <CtaSection />
+      </main>
+      <Footer />
     </div>
   );
 }
